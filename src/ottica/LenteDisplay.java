@@ -93,7 +93,7 @@ public class LenteDisplay extends SimulationDisplay
      */
     protected boolean activePoint(double x, double y)
       { 
-        return x<-0.05;;
+        return x<-0.05;
       }
 
     /**

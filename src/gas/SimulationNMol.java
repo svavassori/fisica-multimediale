@@ -22,7 +22,7 @@ public class SimulationNMol extends Simulation
      * Vertical side of the recipient for the gas
      */
     public double getVerticalSide()
-      { return gamma*Math.sqrt(t/p);;
+      { return gamma*Math.sqrt(t/p);
       }
 
     /**
