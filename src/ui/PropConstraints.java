@@ -127,7 +127,7 @@ public class PropConstraints
 
         ComponentPeer cp=com.getPeer();
         if (cp!=null)
-          { Dimension dd=cp.minimumSize();
+          { Dimension dd=cp.getMinimumSize();
             if (d.width<dd.width)
               d.width=dd.width;
             if (d.height<dd.height)

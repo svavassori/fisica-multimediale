@@ -112,7 +112,7 @@ public class PropConstraint
             if (minimum)
               { ComponentPeer pee=other.getPeer();
                 if (pee!=null)
-                  { Dimension md=pee.minimumSize();
+                  { Dimension md=pee.getMinimumSize();
                     if (d.width<md.width)
                       d.width=md.width;
                     if (d.height<md.height)
