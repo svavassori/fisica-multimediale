@@ -1,1 +1,222 @@
-package circuiti;import ui.*;import java.awt.*;/** * A dialog box to input a voltage generator */public class GeneratoreDialog extends TrackedDialog  {     Component target;    HelpDisplayer help;    static Font font_small=new Font("TimesRoman", Font.PLAIN, 12);    static Font font_medium=new Font("TimesRoman", Font.PLAIN, 14);    static Font font_large=new Font("TimesRoman", Font.BOLD, 16);    TabsPanel tabs;    CheckboxGroup cbg;    Checkbox cb_cc, cb_sin;    NumericField ccRi, ccE;    NumericField sinRi, sinEmax, sinFreq, sinPhase;    Panel cards_panel;    CardLayout cards;    /**     * Create a new settings dialog. If the user confirms     * the changes, the target component will be notified with     * an action event having a Generatore object as the argument     */    public GeneratoreDialog(Component target)      { super(UserInterface.getDummyFrame(),               "Aggiungi generatore f.e.m.", true);        this.target=target;        help=UserInterface.getHelpDisplayer();        // setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));        setLayout(new BorderLayout());                //        // Crea la barra di bottoni in alto        //        tabs=new TabsPanel();        tabs.setFont(font_small);        tabs.add("Tipo di generatore");        tabs.add("Tens. costante");        tabs.add("Tens. sinusoidale");        add("North", tabs);        cards_panel=new Panel();        cards=new CardLayout();        cards_panel.setLayout(cards);        Label lab;        //        // Crea il pannello con l'input del tipo di generatore         //        Panel tipo_panel=new Panel();        tipo_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));        lab=new Label("Tipo di generatore");        lab.setFont(font_large);        tipo_panel.add("", lab);        cbg=new CheckboxGroup();        cb_cc= new Checkbox("Tensione costante", cbg, false);        cb_cc.setFont(font_medium);        tipo_panel.add("", cb_cc);        cb_sin= new Checkbox("Tensione sinusoidale", cbg, false);        cb_sin.setFont(font_medium);        tipo_panel.add("", cb_sin);                cards_panel.add("Tipo", tipo_panel);                       //        // Crea il pannello con l'input per il gen. costante        //        Panel cc_panel=new Panel();        cc_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));        cc_panel.setFont(font_medium);        lab=new Label("Generatore di f.e.m. costante");        lab.setFont(font_large);        cc_panel.add("", lab);        ccE=new NumericField(8, 0, 10000);        ccE.setValue(10);        cc_panel.add("", new LabeledComponent(ccE, "Tensione [V]",                                              LabeledComponent.LEFT));        ccRi=new NumericField(8, 0, 1e6);        ccRi.setValue(0);        cc_panel.add("", new LabeledComponent(ccRi,                   "Resistenza interna [Ohm]", LabeledComponent.LEFT));        cards_panel.add("CC", cc_panel);                //        // Crea il pannello con l'input per il gen. sinusoidale        //        Panel sin_panel=new Panel();        sin_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));        sin_panel.setFont(font_medium);        lab=new Label("Generatore di f.e.m. sinusoidale");        lab.setFont(font_large);        sin_panel.add("", lab);        sinEmax=new NumericField(8, 0, 10000);        sinEmax.setValue(220);        sin_panel.add("", new LabeledComponent(sinEmax, "Tensione max. [V]",                                              LabeledComponent.LEFT));        sinRi=new NumericField(8, 0, 1e6);        sinRi.setValue(0);        sin_panel.add("", new LabeledComponent(sinRi,                   "Resistenza interna [Ohm]", LabeledComponent.LEFT));        sinFreq=new NumericField(8, 0, 1000);        sinFreq.setValue(50);        sin_panel.add("", new LabeledComponent(sinFreq,                   "Frequenza [Hz]", LabeledComponent.LEFT));        sinPhase=new NumericField(8, -180, 360);        sinPhase.setValue(0);        sin_panel.add("", new LabeledComponent(sinPhase,                   "Fase [deg]", LabeledComponent.LEFT));        cards_panel.add("Sin", sin_panel);                add("Center", cards_panel);        cards.show(cards_panel, "Tipo");        //        // Crea la barra di bottoni in basso        //        ImageLoader il=UserInterface.getImageLoader();        Panel confirm_panel=new Panel();        confirm_panel.setFont(font_large);        confirm_panel.setLayout(new FlowLayout(FlowLayout.LEFT));        confirm_panel.add("", new ImageButton3D("OK",                                   il.load("icons/ok.gif")));        confirm_panel.add("", new ImageButton3D("Annulla",                                   il.load("icons/cancel.gif")));        confirm_panel.add("", new ImageButton3D("Aiuto",                                   il.load("icons/help.gif")));        add("South", confirm_panel);        cbg.setCurrent(cb_cc);      }    public boolean action(Event evt, Object what)      { if ("OK".equals(what))          { dispose();            Checkbox curr=cbg.getCurrent();            Generatore gen=null;            if (curr==cb_cc)              gen=new GeneratoreCC(ccE.getValue(), ccRi.getValue());            else if (curr==cb_sin)              gen=new GeneratoreSin(sinEmax.getValue(),                                     sinFreq.getValue()*2*Math.PI,                                    sinPhase.getValue()*Math.PI/180,                                    sinRi.getValue());            target.deliverEvent(new Event(target, Event.ACTION_EVENT, gen));          }        else if ("Annulla".equals(what))          { dispose();          }        else if ("Aiuto".equals(what))          { help.displayHelp("help/circuiti", "generatore");          }        else if ("Tipo di generatore".equals(what))          { cards.show(cards_panel, "Tipo");            tabs.show("Tipo di generatore");          }        else if ("Tens. costante".equals(what) &&                 cbg.getCurrent()==cb_cc)          { cards.show(cards_panel, "CC");            tabs.show("Tens. costante");          }        else if ("Tens. sinusoidale".equals(what) &&                 cbg.getCurrent()==cb_sin)          { cards.show(cards_panel, "Sin");            tabs.show("Tens. sinusoidale");          }        return true;      }    public boolean handleEvent(Event evt)      { if (evt.id == Event.WINDOW_DESTROY)          dispose();        return super.handleEvent(evt);      }  }
+package circuiti;
+
+import ui.*;
+import java.awt.*;
+
+
+/**
+ * A dialog box to input a voltage generator
+ */
+public class GeneratoreDialog extends TrackedDialog
+  { 
+    Component target;
+    HelpDisplayer help;
+    static Font font_small=new Font("TimesRoman", Font.PLAIN, 12);
+    static Font font_medium=new Font("TimesRoman", Font.PLAIN, 14);
+    static Font font_large=new Font("TimesRoman", Font.BOLD, 16);
+
+    TabsPanel tabs;
+    CheckboxGroup cbg;
+    Checkbox cb_cc, cb_sin;
+
+    NumericField ccRi, ccE;
+    NumericField sinRi, sinEmax, sinFreq, sinPhase;
+
+    Panel cards_panel;
+    CardLayout cards;
+
+
+    /**
+     * Create a new settings dialog. If the user confirms
+     * the changes, the target component will be notified with
+     * an action event having a Generatore object as the argument
+     */
+    public GeneratoreDialog(Component target)
+      { super(UserInterface.getDummyFrame(), 
+              "Aggiungi generatore f.e.m.", true);
+
+        this.target=target;
+        help=UserInterface.getHelpDisplayer();
+
+        // setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));
+        setLayout(new BorderLayout());
+
+        
+        //
+        // Crea la barra di bottoni in alto
+        //
+        tabs=new TabsPanel();
+        tabs.setFont(font_small);
+        tabs.add("Tipo di generatore");
+        tabs.add("Tens. costante");
+        tabs.add("Tens. sinusoidale");
+        add("North", tabs);
+
+
+        cards_panel=new Panel();
+        cards=new CardLayout();
+        cards_panel.setLayout(cards);
+
+        Label lab;
+
+
+        //
+        // Crea il pannello con l'input del tipo di generatore 
+        //
+        Panel tipo_panel=new Panel();
+        tipo_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));
+        lab=new Label("Tipo di generatore");
+        lab.setFont(font_large);
+        tipo_panel.add("", lab);
+
+        cbg=new CheckboxGroup();
+
+        cb_cc= new Checkbox("Tensione costante", cbg, false);
+        cb_cc.setFont(font_medium);
+        tipo_panel.add("", cb_cc);
+        cb_sin= new Checkbox("Tensione sinusoidale", cbg, false);
+        cb_sin.setFont(font_medium);
+        tipo_panel.add("", cb_sin);
+        
+
+        cards_panel.add("Tipo", tipo_panel);
+       
+        
+        //
+        // Crea il pannello con l'input per il gen. costante
+        //
+        Panel cc_panel=new Panel();
+        cc_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));
+        cc_panel.setFont(font_medium);
+
+
+        lab=new Label("Generatore di f.e.m. costante");
+        lab.setFont(font_large);
+        cc_panel.add("", lab);
+
+        ccE=new NumericField(8, 0, 10000);
+        ccE.setValue(10);
+        cc_panel.add("", new LabeledComponent(ccE, "Tensione [V]",
+                                              LabeledComponent.LEFT));
+
+        ccRi=new NumericField(8, 0, 1e6);
+        ccRi.setValue(0);
+        cc_panel.add("", new LabeledComponent(ccRi, 
+                  "Resistenza interna [Ohm]", LabeledComponent.LEFT));
+
+        cards_panel.add("CC", cc_panel);
+
+
+        
+        //
+        // Crea il pannello con l'input per il gen. sinusoidale
+        //
+        Panel sin_panel=new Panel();
+        sin_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));
+        sin_panel.setFont(font_medium);
+
+
+        lab=new Label("Generatore di f.e.m. sinusoidale");
+        lab.setFont(font_large);
+        sin_panel.add("", lab);
+
+        sinEmax=new NumericField(8, 0, 10000);
+        sinEmax.setValue(220);
+        sin_panel.add("", new LabeledComponent(sinEmax, "Tensione max. [V]",
+                                              LabeledComponent.LEFT));
+
+        sinRi=new NumericField(8, 0, 1e6);
+        sinRi.setValue(0);
+        sin_panel.add("", new LabeledComponent(sinRi, 
+                  "Resistenza interna [Ohm]", LabeledComponent.LEFT));
+
+        sinFreq=new NumericField(8, 0, 1000);
+        sinFreq.setValue(50);
+        sin_panel.add("", new LabeledComponent(sinFreq, 
+                  "Frequenza [Hz]", LabeledComponent.LEFT));
+
+        sinPhase=new NumericField(8, -180, 360);
+        sinPhase.setValue(0);
+        sin_panel.add("", new LabeledComponent(sinPhase, 
+                  "Fase [deg]", LabeledComponent.LEFT));
+
+        cards_panel.add("Sin", sin_panel);
+
+
+        
+
+        add("Center", cards_panel);
+        cards.show(cards_panel, "Tipo");
+
+
+        //
+        // Crea la barra di bottoni in basso
+        //
+        ImageLoader il=UserInterface.getImageLoader();
+        Panel confirm_panel=new Panel();
+        confirm_panel.setFont(font_large);
+        confirm_panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        confirm_panel.add("", new ImageButton3D("OK",
+                                   il.load("icons/ok.gif")));
+        confirm_panel.add("", new ImageButton3D("Annulla",
+                                   il.load("icons/cancel.gif")));
+        confirm_panel.add("", new ImageButton3D("Aiuto",
+                                   il.load("icons/help.gif")));
+        add("South", confirm_panel);
+
+
+        cbg.setCurrent(cb_cc);
+      }
+
+
+
+
+    public boolean action(Event evt, Object what)
+      { if ("OK".equals(what))
+          { dispose();
+            Checkbox curr=cbg.getCurrent();
+            Generatore gen=null;
+            if (curr==cb_cc)
+              gen=new GeneratoreCC(ccE.getValue(), ccRi.getValue());
+            else if (curr==cb_sin)
+              gen=new GeneratoreSin(sinEmax.getValue(), 
+                                    sinFreq.getValue()*2*Math.PI,
+                                    sinPhase.getValue()*Math.PI/180,
+                                    sinRi.getValue());
+
+            target.deliverEvent(new Event(target, Event.ACTION_EVENT, gen));
+          }
+        else if ("Annulla".equals(what))
+          { dispose();
+          }
+        else if ("Aiuto".equals(what))
+          { help.displayHelp("help/circuiti", "generatore");
+          }
+        else if ("Tipo di generatore".equals(what))
+          { cards.show(cards_panel, "Tipo");
+            tabs.show("Tipo di generatore");
+          }
+        else if ("Tens. costante".equals(what) &&
+                 cbg.getCurrent()==cb_cc)
+          { cards.show(cards_panel, "CC");
+            tabs.show("Tens. costante");
+          }
+        else if ("Tens. sinusoidale".equals(what) &&
+                 cbg.getCurrent()==cb_sin)
+          { cards.show(cards_panel, "Sin");
+            tabs.show("Tens. sinusoidale");
+          }
+
+        return true;
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.id == Event.WINDOW_DESTROY)
+          dispose();
+
+        return super.handleEvent(evt);
+      }
+
+
+
+  }

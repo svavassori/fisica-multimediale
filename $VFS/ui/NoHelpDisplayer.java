@@ -1,1 +1,17 @@
-package ui;/** * A null help displayer. */public class NoHelpDisplayer implements HelpDisplayer  {     /**     * Shows an help page for a given topic/item pair     * The interpretation of topic/item is dependent on the     * implementation     */    public void displayHelp(String topic, String item)      {      }  }
+package ui;
+
+/**
+ * A null help displayer.
+ */
+public class NoHelpDisplayer implements HelpDisplayer
+  { 
+    /**
+     * Shows an help page for a given topic/item pair
+     * The interpretation of topic/item is dependent on the
+     * implementation
+     */
+    public void displayHelp(String topic, String item)
+      {
+      }
+
+  }

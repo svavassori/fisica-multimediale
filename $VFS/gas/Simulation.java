@@ -1,1 +1,445 @@
-package gas;import java.util.*;/** * This is the base class for the simulations of the gas */public abstract class Simulation  { protected Settings settings;    protected static final double R=Settings.R;    protected static final double M=Settings.M;    protected double p,t,rho;    protected static final double radius=2.2037e-10;    protected static final double Avogadro=6.023e23;    protected double alpha, beta;    protected Random rand;    protected int molNumber=0;    protected int segments[];    protected double x0[][];    protected double y0[][];    protected double dir[][];    protected double vel[][];    protected double len[][];    protected double dur[][];    protected double t0[][];    protected int sideHits=0;    protected int molHits=0;    protected Simulation(Settings settings)      { this.settings=settings;        p=settings.p;        t=settings.t;        rho=settings.rho;        alpha=4*Math.PI*Math.pow(M/(2*Math.PI*R*t), 1.5);        beta=M/(2*R*t);        rand=new Random();      }    /**     * Returns the expected velocity (root of mean squared velocity)     */    public double getExpectedVelocity()      { double vq=3*R*t/M;        return Math.sqrt(vq);      }    /**     * Returns the modal (i.e. most probable) velocity     */    public double getModalVelocity()      { return 1/Math.sqrt(beta);      }    /**     * Compute the temperature from the mean squared velocity     */    public double getTempFromVms(double vms)      { return M*vms/(3*R);      }    /**     * Compute the pressure from the mean squared velocity     */    public double getPressFromVms(double vms)      { return rho*vms/3;      }    /**     * Generates a new velocity using the Boltzmann distribution     */    public double generateVelocity()      { double x=rand.nextDouble();        double step=getExpectedVelocity()*0.05;        double last, curr=-100;        int iter=0;        do          { last=curr;            curr=generateVelocity(x, step);            step*=0.5;          }   while(iter++<20 && Math.abs(curr-last)>1e-3*curr);                return curr;      }    /**     * Auxiliary function for generateVelocity()     */    private double generateVelocity(double x, double step)      { double t1, t0, s1, s0, y;        t1=t0=0;        s1=s0=0;        y=1;        while (s1<x && y>0)          { s0=s1;            t0=t1;            t1+=step;            double tt=t0+0.5*step;            y=alpha*tt*tt*Math.exp(-beta*tt*tt);            s1+=y*step;          }        double t=t0+step*(x-s0)/(s1-s0);        return t;      }    /**     * Get the expected free path     */    public double getExpectedFreePath()      { double lam=4*Math.PI*radius*radius*Avogadro*rho/M;        return 1/lam;      }    /**     * Generate a random double with exponential distribution     * and expected value 1/lambda     */    public double generateExponential(double lambda)      { double x;        do {          x=rand.nextDouble();        } while (x<=0.0);        return -Math.log(1-x)/lambda;      }    /**     * Generate a random direction (in radians)     */    public double generateDirection()      { return rand.nextDouble()*2*Math.PI;      }    /**     * Number of molecules for this simulation     */    public int getMolNumber()      { return molNumber;      }    /**     * Vertical side of the recipient for the gas     */    public abstract double getVerticalSide();    /**     * Horizontal side of the recipient for the gas     */    public abstract double getHorizontalSide();    /**     * Get the number of segments in the motion of a molecule     */    public int getSegmentNumber(int mol)      { return segments[mol];      }    /**     * Get the initial x position of a segment     */    public double getSegmentX0(int mol, int seg)      { return x0[mol][seg];      }    /**     * Get the initial y position of a segment     */    public double getSegmentY0(int mol, int seg)      { return y0[mol][seg];      }    /**     * Get the direction of a segment (in rads)     */    public double getSegmentDirection(int mol, int seg)      { return dir[mol][seg];      }    /**     * Get the lenght of a segment      */    public double getSegmentLength(int mol, int seg)      { return len[mol][seg];      }    /**     * Get the velocity of a segment      */    public double getSegmentVelocity(int mol, int seg)      { return vel[mol][seg];      }    /**     * Get the duration of a segment      */    public double getSegmentDuration(int mol, int seg)      { return dur[mol][seg];      }    /**     * Get the initial instant of a segment      */    public double getSegmentT0(int mol, int seg)      { return t0[mol][seg];      }    /**     * Gets the total duration of the simulation     */    public double getTotalDuration()      {         double totdur=-10;        if (molNumber<1)          return 0;                int i;        for(i=0; i<molNumber; i++)          { int segs=segments[i];            double currdur=t0[i][segs-1]+dur[i][segs-1];            if (currdur>totdur)              totdur=currdur;          }        return totdur;      }    /**     * Get the number of hits on the sides of the recipients     */    public int getSideHits()      { return sideHits;      }    /**     * Get the number of hits between molecules     */    public int getMolHits()      { return molHits;      }    /**     * Get the measured mean squared velocity     */    public double getMeasuredVms()      { int m, seg, ct;        double sum2;        ct=0;        sum2=0;        for(m=0; m<molNumber; m++)          for(seg=0; seg<segments[m]; seg++)            { sum2+=vel[m][seg]*vel[m][seg];              ct++;            }        if (ct>0)          return sum2/ct;        else          return 0;      }    /**     * Get the measured mean path     */    public double getMeasuredPath()      { int m, seg, ct;        double sum;        ct=0;        sum=0;        for(m=0; m<molNumber; m++)          for(seg=0; seg<segments[m]; seg++)            { sum+=len[m][seg];              ct++;            }        if (ct>0)          return sum/ct;        else          return 0;      }    /**     * Allocate info for n molecules     */    protected void allocMol(int molNumber)      { this.molNumber=molNumber;        segments=new int[molNumber];        x0=new double[molNumber][];        y0=new double[molNumber][];        dir=new double[molNumber][];        len=new double[molNumber][];        vel=new double[molNumber][];        dur=new double[molNumber][];        t0=new double[molNumber][];        int i;        for(i=0; i<molNumber; i++)          { segments[i]=0;          }      }    /**     * Make the number of segments for a molecule grow up to a      * given value     */    protected void growSegments(int mol, int segs)      { int ol;        if (x0[mol]==null)          ol=0;        else          ol=x0[mol].length;        if (segs>ol)          { int nl=Math.max(segs, ol*3/2)+3;            int i;            double tmp[];            tmp=x0[mol];            x0[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              x0[mol][i]=tmp[i];                       tmp=y0[mol];            y0[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              y0[mol][i]=tmp[i];            tmp=dir[mol];            dir[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              dir[mol][i]=tmp[i];            tmp=len[mol];            len[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              len[mol][i]=tmp[i];            tmp=vel[mol];            vel[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              vel[mol][i]=tmp[i];            tmp=dur[mol];            dur[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              dur[mol][i]=tmp[i];            tmp=t0[mol];            t0[mol]=new double[nl];            for(i=0; i<segments[mol]; i++)              t0[mol][i]=tmp[i];          }        segments[mol]=segs;      }            /**     * Compute the simulation results     */    public abstract void compute();    /**     * Gets the max. lenght of a segment before the hit againts a side     */    protected double getMaxLengthBeforeSide(double x0, double y0, double dir)      { double sin=Math.sin(dir);        double cos=Math.cos(dir);        double eps=1e-5;        double lh, lv;        if (cos>eps)          lh=(getHorizontalSide()-x0)/cos;        else if (cos<-eps)          lh=x0/(-cos);        else          lh=Double.POSITIVE_INFINITY;        if (sin>eps)          lv=(getVerticalSide()-y0)/sin;        else if (sin<-eps)          lv=y0/(-sin);        else          lv=Double.POSITIVE_INFINITY;        return Math.min(lh, lv);      }    /**     * Find a segment which contains the time istant t     */    int findSegment(int mol, double t)      { int sn=segments[mol];        int i=0, j=sn-1;        while (i<j)          { int k=(i+j)/2;            if (t0[mol][k]>=t)              j=k-1;            else if (t0[mol][k]+dur[mol][k]<t)              i=k+1;            else              return k;          }        return i>=sn? sn-1: i;      }    /**     * Get the heading for the table     */    public abstract String getTableHeading();    /**     * Get the number of rows in the table     */    public abstract int getTableRowCount();    /**     * Get a row of the table     */    public abstract String getTableRow(int i);  }
+package gas;
+
+import java.util.*;
+
+/**
+ * This is the base class for the simulations of the gas
+ */
+public abstract class Simulation
+  { protected Settings settings;
+    protected static final double R=Settings.R;
+    protected static final double M=Settings.M;
+    protected double p,t,rho;
+    protected static final double radius=2.2037e-10;
+    protected static final double Avogadro=6.023e23;
+    protected double alpha, beta;
+    protected Random rand;
+    protected int molNumber=0;
+    protected int segments[];
+    protected double x0[][];
+    protected double y0[][];
+    protected double dir[][];
+    protected double vel[][];
+    protected double len[][];
+    protected double dur[][];
+    protected double t0[][];
+
+    protected int sideHits=0;
+    protected int molHits=0;
+
+    protected Simulation(Settings settings)
+      { this.settings=settings;
+        p=settings.p;
+        t=settings.t;
+        rho=settings.rho;
+        alpha=4*Math.PI*Math.pow(M/(2*Math.PI*R*t), 1.5);
+        beta=M/(2*R*t);
+        rand=new Random();
+      }
+
+    /**
+     * Returns the expected velocity (root of mean squared velocity)
+     */
+    public double getExpectedVelocity()
+      { double vq=3*R*t/M;
+        return Math.sqrt(vq);
+      }
+
+    /**
+     * Returns the modal (i.e. most probable) velocity
+     */
+    public double getModalVelocity()
+      { return 1/Math.sqrt(beta);
+      }
+
+    /**
+     * Compute the temperature from the mean squared velocity
+     */
+    public double getTempFromVms(double vms)
+      { return M*vms/(3*R);
+      }
+
+    /**
+     * Compute the pressure from the mean squared velocity
+     */
+    public double getPressFromVms(double vms)
+      { return rho*vms/3;
+      }
+
+    /**
+     * Generates a new velocity using the Boltzmann distribution
+     */
+    public double generateVelocity()
+      { double x=rand.nextDouble();
+        double step=getExpectedVelocity()*0.05;
+        double last, curr=-100;
+        int iter=0;
+
+
+        do
+          { last=curr;
+            curr=generateVelocity(x, step);
+            step*=0.5;
+          }   while(iter++<20 && Math.abs(curr-last)>1e-3*curr);
+        
+        return curr;
+      }
+
+    /**
+     * Auxiliary function for generateVelocity()
+     */
+    private double generateVelocity(double x, double step)
+      { double t1, t0, s1, s0, y;
+
+        t1=t0=0;
+        s1=s0=0;
+        y=1;
+        while (s1<x && y>0)
+          { s0=s1;
+            t0=t1;
+            t1+=step;
+            double tt=t0+0.5*step;
+            y=alpha*tt*tt*Math.exp(-beta*tt*tt);
+            s1+=y*step;
+          }
+        double t=t0+step*(x-s0)/(s1-s0);
+
+        return t;
+      }
+
+    /**
+     * Get the expected free path
+     */
+    public double getExpectedFreePath()
+      { double lam=4*Math.PI*radius*radius*Avogadro*rho/M;
+
+        return 1/lam;
+      }
+
+
+    /**
+     * Generate a random double with exponential distribution
+     * and expected value 1/lambda
+     */
+    public double generateExponential(double lambda)
+      { double x;
+        do {
+          x=rand.nextDouble();
+        } while (x<=0.0);
+
+        return -Math.log(1-x)/lambda;
+      }
+
+    /**
+     * Generate a random direction (in radians)
+     */
+    public double generateDirection()
+      { return rand.nextDouble()*2*Math.PI;
+      }
+
+
+    /**
+     * Number of molecules for this simulation
+     */
+    public int getMolNumber()
+      { return molNumber;
+      }
+
+    /**
+     * Vertical side of the recipient for the gas
+     */
+    public abstract double getVerticalSide();
+
+    /**
+     * Horizontal side of the recipient for the gas
+     */
+    public abstract double getHorizontalSide();
+
+    /**
+     * Get the number of segments in the motion of a molecule
+     */
+    public int getSegmentNumber(int mol)
+      { return segments[mol];
+      }
+
+    /**
+     * Get the initial x position of a segment
+     */
+    public double getSegmentX0(int mol, int seg)
+      { return x0[mol][seg];
+      }
+
+    /**
+     * Get the initial y position of a segment
+     */
+    public double getSegmentY0(int mol, int seg)
+      { return y0[mol][seg];
+      }
+
+    /**
+     * Get the direction of a segment (in rads)
+     */
+    public double getSegmentDirection(int mol, int seg)
+      { return dir[mol][seg];
+      }
+
+    /**
+     * Get the lenght of a segment 
+     */
+    public double getSegmentLength(int mol, int seg)
+      { return len[mol][seg];
+      }
+
+    /**
+     * Get the velocity of a segment 
+     */
+    public double getSegmentVelocity(int mol, int seg)
+      { return vel[mol][seg];
+      }
+
+    /**
+     * Get the duration of a segment 
+     */
+    public double getSegmentDuration(int mol, int seg)
+      { return dur[mol][seg];
+      }
+
+    /**
+     * Get the initial instant of a segment 
+     */
+    public double getSegmentT0(int mol, int seg)
+      { return t0[mol][seg];
+      }
+
+    /**
+     * Gets the total duration of the simulation
+     */
+    public double getTotalDuration()
+      { 
+        double totdur=-10;
+
+        if (molNumber<1)
+          return 0;
+        
+        int i;
+        for(i=0; i<molNumber; i++)
+          { int segs=segments[i];
+            double currdur=t0[i][segs-1]+dur[i][segs-1];
+            if (currdur>totdur)
+              totdur=currdur;
+          }
+
+        return totdur;
+      }
+
+    /**
+     * Get the number of hits on the sides of the recipients
+     */
+    public int getSideHits()
+      { return sideHits;
+      }
+
+    /**
+     * Get the number of hits between molecules
+     */
+    public int getMolHits()
+      { return molHits;
+      }
+
+    /**
+     * Get the measured mean squared velocity
+     */
+    public double getMeasuredVms()
+      { int m, seg, ct;
+        double sum2;
+
+        ct=0;
+        sum2=0;
+
+        for(m=0; m<molNumber; m++)
+          for(seg=0; seg<segments[m]; seg++)
+            { sum2+=vel[m][seg]*vel[m][seg];
+              ct++;
+            }
+        if (ct>0)
+          return sum2/ct;
+        else
+          return 0;
+      }
+
+
+    /**
+     * Get the measured mean path
+     */
+    public double getMeasuredPath()
+      { int m, seg, ct;
+        double sum;
+
+        ct=0;
+        sum=0;
+
+        for(m=0; m<molNumber; m++)
+          for(seg=0; seg<segments[m]; seg++)
+            { sum+=len[m][seg];
+              ct++;
+            }
+        if (ct>0)
+          return sum/ct;
+        else
+          return 0;
+      }
+
+
+
+
+    /**
+     * Allocate info for n molecules
+     */
+    protected void allocMol(int molNumber)
+      { this.molNumber=molNumber;
+        segments=new int[molNumber];
+        x0=new double[molNumber][];
+        y0=new double[molNumber][];
+        dir=new double[molNumber][];
+        len=new double[molNumber][];
+        vel=new double[molNumber][];
+        dur=new double[molNumber][];
+        t0=new double[molNumber][];
+        int i;
+        for(i=0; i<molNumber; i++)
+          { segments[i]=0;
+          }
+      }
+
+
+    /**
+     * Make the number of segments for a molecule grow up to a 
+     * given value
+     */
+    protected void growSegments(int mol, int segs)
+      { int ol;
+        if (x0[mol]==null)
+          ol=0;
+        else
+          ol=x0[mol].length;
+
+        if (segs>ol)
+          { int nl=Math.max(segs, ol*3/2)+3;
+            int i;
+            double tmp[];
+
+            tmp=x0[mol];
+            x0[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              x0[mol][i]=tmp[i];
+           
+            tmp=y0[mol];
+            y0[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              y0[mol][i]=tmp[i];
+
+            tmp=dir[mol];
+            dir[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              dir[mol][i]=tmp[i];
+
+            tmp=len[mol];
+            len[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              len[mol][i]=tmp[i];
+
+            tmp=vel[mol];
+            vel[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              vel[mol][i]=tmp[i];
+
+            tmp=dur[mol];
+            dur[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              dur[mol][i]=tmp[i];
+
+            tmp=t0[mol];
+            t0[mol]=new double[nl];
+            for(i=0; i<segments[mol]; i++)
+              t0[mol][i]=tmp[i];
+          }
+        segments[mol]=segs;
+
+      }
+        
+    /**
+     * Compute the simulation results
+     */
+    public abstract void compute();
+
+
+    /**
+     * Gets the max. lenght of a segment before the hit againts a side
+     */
+    protected double getMaxLengthBeforeSide(double x0, double y0, double dir)
+      { double sin=Math.sin(dir);
+        double cos=Math.cos(dir);
+
+        double eps=1e-5;
+
+        double lh, lv;
+
+        if (cos>eps)
+          lh=(getHorizontalSide()-x0)/cos;
+        else if (cos<-eps)
+          lh=x0/(-cos);
+        else
+          lh=Double.POSITIVE_INFINITY;
+
+        if (sin>eps)
+          lv=(getVerticalSide()-y0)/sin;
+        else if (sin<-eps)
+          lv=y0/(-sin);
+        else
+          lv=Double.POSITIVE_INFINITY;
+
+        return Math.min(lh, lv);
+      }
+
+    /**
+     * Find a segment which contains the time istant t
+     */
+    int findSegment(int mol, double t)
+      { int sn=segments[mol];
+
+        int i=0, j=sn-1;
+
+        while (i<j)
+          { int k=(i+j)/2;
+            if (t0[mol][k]>=t)
+              j=k-1;
+            else if (t0[mol][k]+dur[mol][k]<t)
+              i=k+1;
+            else
+              return k;
+          }
+
+        return i>=sn? sn-1: i;
+
+      }
+
+    /**
+     * Get the heading for the table
+     */
+    public abstract String getTableHeading();
+
+    /**
+     * Get the number of rows in the table
+     */
+    public abstract int getTableRowCount();
+
+
+    /**
+     * Get a row of the table
+     */
+    public abstract String getTableRow(int i);
+
+  }
+
+
+

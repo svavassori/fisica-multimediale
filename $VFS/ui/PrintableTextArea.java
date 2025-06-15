@@ -1,1 +1,154 @@
-package ui;import java.awt.*;import java.awt.event.*;import java.util.*;import java.io.*;import java.awt.datatransfer.*;import ui.*;/** * This class adds a method printText to java.awt.TextArea */public class PrintableTextArea extends TextArea  implements ClipboardOwner  { private final int MAX_FONT_SIZE=12;    private final int MIN_FONT_SIZE=6;    private PopupMenu p;    /**     * This variable is used to store the print dialog     * properties     */    protected static Properties printProps;    static {      printProps=new Properties();    }    public PrintableTextArea()  {             }    /**     * Prints the text in the textarea, taking care of     * breaking pages.     */    public void lostOwnership(Clipboard clipboard,Transferable contents){};    public void printText() {/*        System.out.println("Entering printText");        PrintJob pj=Toolkit                      .getDefaultToolkit()                     .getPrintJob(new Frame(),//UserInterface.getDummyFrame(),                                  "Stampa",                                  printProps);        if (pj==null)          return;        BufferedReader in=new BufferedReader(new StringReader(getText()));        int maxLineWidth=findMaxLineWidth(in);        try { in.close(); } catch (IOException e) { }        in=new BufferedReader(new StringReader(getText()));        printPages(in, pj, maxLineWidth);        try { in.close(); } catch (IOException e) { }        pj.end();*/        System.out.println("Entering printText");        String src=getText();        //String dst=src.replace('\n','\r');        StringSelection str=new StringSelection(src);        Clipboard clip=Toolkit.getDefaultToolkit().getSystemClipboard();        clip.setContents(str,str);      }    protected int findMaxLineWidth(BufferedReader in)      { int max=0;        String line;        try {          while ((line=in.readLine()) != null)            { if (line.length() > max)                max=line.length();            }          return max;        } catch (IOException e) {          return max;        }      }    protected void printPages(BufferedReader in, PrintJob pj, int maxWidth)      { Graphics g;        boolean cont;        Dimension dim=pj.getPageDimension();        int fontsize=MAX_FONT_SIZE;        Font font=null;        FontMetrics fm;        do {          g=pj.getGraphics();          if (font==null)            do {              font=new Font("Courier", Font.PLAIN, fontsize);              g.setFont(font);              System.out.println("  Trying font size = "+fontsize);              fm=g.getFontMetrics();              if (fm.charWidth('M')*maxWidth < dim.width-20)                break;              fontsize--;            } while (fontsize>=MIN_FONT_SIZE);          else            g.setFont(font);          cont=printOnePage(in, g, dim);          g.dispose();        } while(cont);      }    /**     * @returns true if the printing must go on     */    protected boolean printOnePage(BufferedReader in, Graphics g,                                    Dimension dim)      { FontMetrics fm=g.getFontMetrics();        int y=fm.getAscent()+5;        int x=5;        int h=fm.getHeight();        while (y<dim.height-h)          { String line;            try              { line=in.readLine();              }            catch (IOException e)              { return false;              }                        if (line==null)              return false;            g.drawString(line, x, y);            y+=h;          }        return true;      }        public Dimension getPreferredSize() {        if (getParent()!=null) {            Dimension d=getParent().size();            d.height-=40;            return d;        } else            return super.getPreferredSize();    }    /**     * This is to test the object: control+click will activate the print     */    public boolean mouseDown(Event evt, int x, int y) {        if (evt.controlDown())          printText();        return super.mouseDown(evt, x, y);    }}
+package ui;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import java.io.*;
+import java.awt.datatransfer.*;
+import ui.*;
+
+/**
+ * This class adds a method printText to java.awt.TextArea
+ */
+public class PrintableTextArea extends TextArea  implements ClipboardOwner
+  { private final int MAX_FONT_SIZE=12;
+    private final int MIN_FONT_SIZE=6;
+    private PopupMenu p;
+
+    /**
+     * This variable is used to store the print dialog
+     * properties
+     */
+
+    protected static Properties printProps;
+
+    static {
+      printProps=new Properties();
+    }
+    public PrintableTextArea()  {         
+    }
+
+    /**
+     * Prints the text in the textarea, taking care of
+     * breaking pages.
+     */
+    public void lostOwnership(Clipboard clipboard,Transferable contents){};
+
+
+    public void printText() {
+
+/*
+        System.out.println("Entering printText");
+        PrintJob pj=Toolkit 
+                     .getDefaultToolkit()
+                     .getPrintJob(new Frame(),//UserInterface.getDummyFrame(),
+                                  "Stampa",
+                                  printProps);
+        if (pj==null)
+          return;
+        BufferedReader in=new BufferedReader(new StringReader(getText()));
+        int maxLineWidth=findMaxLineWidth(in);
+        try { in.close(); } catch (IOException e) { }
+        in=new BufferedReader(new StringReader(getText()));
+        printPages(in, pj, maxLineWidth);
+        try { in.close(); } catch (IOException e) { }
+        pj.end();*/
+
+
+        System.out.println("Entering printText");
+
+        String src=getText();
+        //String dst=src.replace('\n','\r');
+
+        StringSelection str=new StringSelection(src);
+
+        Clipboard clip=Toolkit.getDefaultToolkit().getSystemClipboard();
+        clip.setContents(str,str);
+
+      }
+
+    protected int findMaxLineWidth(BufferedReader in)
+      { int max=0;
+        String line;
+
+        try {
+          while ((line=in.readLine()) != null)
+            { if (line.length() > max)
+                max=line.length();
+            }
+          return max;
+        } catch (IOException e) {
+          return max;
+        }
+      }
+
+    protected void printPages(BufferedReader in, PrintJob pj, int maxWidth)
+      { Graphics g;
+        boolean cont;
+        Dimension dim=pj.getPageDimension();
+        int fontsize=MAX_FONT_SIZE;
+        Font font=null;
+        FontMetrics fm;
+        do {
+          g=pj.getGraphics();
+          if (font==null)
+            do {
+              font=new Font("Courier", Font.PLAIN, fontsize);
+              g.setFont(font);
+              System.out.println("  Trying font size = "+fontsize);
+              fm=g.getFontMetrics();
+              if (fm.charWidth('M')*maxWidth < dim.width-20)
+                break;
+              fontsize--;
+            } while (fontsize>=MIN_FONT_SIZE);
+          else
+            g.setFont(font);
+          cont=printOnePage(in, g, dim);
+          g.dispose();
+        } while(cont);
+      }
+
+    /**
+     * @returns true if the printing must go on
+     */
+    protected boolean printOnePage(BufferedReader in, Graphics g, 
+                                   Dimension dim)
+      { FontMetrics fm=g.getFontMetrics();
+        int y=fm.getAscent()+5;
+        int x=5;
+        int h=fm.getHeight();
+        while (y<dim.height-h)
+          { String line;
+            try
+              { line=in.readLine();
+              }
+            catch (IOException e)
+              { return false;
+              }
+            
+            if (line==null)
+              return false;
+            g.drawString(line, x, y);
+            y+=h;
+          }
+
+        return true;
+      }
+    
+    public Dimension getPreferredSize() {
+        if (getParent()!=null) {
+            Dimension d=getParent().size();
+            d.height-=40;
+            return d;
+        } else
+            return super.getPreferredSize();
+    }
+    /**
+     * This is to test the object: control+click will activate the print
+     */
+    public boolean mouseDown(Event evt, int x, int y) {
+        if (evt.controlDown())
+          printText();
+        return super.mouseDown(evt, x, y);
+    }
+}

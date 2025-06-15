@@ -1,1 +1,1 @@
-Error loading image: icons/simul.gif
+Error loading image: icons/simul.gif

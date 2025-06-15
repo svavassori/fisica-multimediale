@@ -1,1 +1,10 @@
-##circuiti    C I R C U I T I   E L E T T R I C IQuesta simulazione consente di studiare circuiti elettricicontenenti resistori, induttori, condensatori e generatoridi forza elettromotrice.##resistoreInserisci il valore della resistenza in Ohm. I valoriammessi sono...
+##circuiti
+    C I R C U I T I   E L E T T R I C I
+Questa simulazione consente di studiare circuiti elettrici
+contenenti resistori, induttori, condensatori e generatori
+di forza elettromotrice.
+
+##resistore
+Inserisci il valore della resistenza in Ohm. I valori
+ammessi sono...
+

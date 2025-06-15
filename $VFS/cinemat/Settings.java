@@ -1,1 +1,117 @@
-package cinemat;import ui.Parameters;import ui.NoParameters;/** * This class contains the settings for the experiment * The following parameters can be used to construct a  * an object through a Parameters instance: *   moto_base      one of "rotatorio", "traslatorio"  *   moto_relativo  one of "rotatorio", "traslatorio", "nessuno" *   vel_base       -10.0 ... 10.0 *   acc_base       -5.0  ... 5.0 *   vel_ang_base   -5.0  ... 5.0 *   x0              -100 ... 100 (default 0) *   raggio         0.1   ... 10.0 *   vel_rel_x      -20.0 ... 20.0 *   vel_rel_y      -20.0 ... 20.0 *   vel_rel_ang    -10.0 ... 10.0 */public class Settings  {     // Tipi di campo    public static final int TRASLATORIO=0;    public static final int ROTATORIO=1;    public static final int NESSUNO=2;    public static final int TIPI_DI_MOTO_BASE=2;    public static final int TIPI_DI_MOTO_RELATIVO=3;    public int ForcedSimulation=0;    // 1.......Moto Uniforme                                      // 2.......Moto Uniformemente Accelerato    public boolean ShowProjection=true;    public int moto_base;    public int moto_relativo;    public double vel_base;    public double acc_base;    public double vel_ang_base;    public double raggio;    public double x0;    public double vel_rel_x;    public double vel_rel_y;    public double vel_rel_ang;    public Settings()      { this(new NoParameters());      }    /**     * Use the Paremeters object for the default value of the fields     */    public Settings(Parameters parm)      {        // Controllo tipo di moto e simulazioni forzate        moto_base=getTipoDiMoto(parm.getString("moto_base", "NONE"));        if (moto_base==NESSUNO)           {moto_base=TRASLATORIO;ForcedSimulation=parm.getInt("Forced",0,0,2);}          else if (moto_base==TRASLATORIO) {ForcedSimulation=parm.getInt("Forced",0,1,2);}          else if (moto_base==ROTATORIO) {                                          ForcedSimulation=parm.getInt("Forced",0,3,4);                                                                                    if (ForcedSimulation==3){ShowProjection=false;}                                                else                                                                  {ShowProjection=true;}                                         }        // System.out.println("FS:" + ForcedSimulation);                moto_relativo=getTipoDiMoto(               parm.getString("moto_relativo", "nessuno"));        // Carico valori parametri del moto        vel_base=parm.getDouble("vel_base", 1, -10, 10);                       if (ForcedSimulation==1) {acc_base=0;}        else {acc_base=parm.getDouble("acc_base", 0, -5, 5);}        if ((acc_base==0) && ForcedSimulation==2) {acc_base=1;}        vel_ang_base=parm.getDouble("vel_ang_base", 1, -5, 5);        raggio=parm.getDouble("raggio", 1, 0.1, 10);        vel_rel_x=parm.getDouble("vel_rel_x", 0, -20, 20);        vel_rel_y=parm.getDouble("vel_rel_y", 0, -20, 20);        vel_rel_ang=parm.getDouble("vel_rel_ang", 0, -10, 10);        x0=parm.getDouble("x0", 0, -100, 100);        // .....................................        // Commentando questa riga  possibile permettere la specificazione di un moto        // relativo anche per le simulazioni Forced        if (ForcedSimulation!=0) {moto_relativo=NESSUNO;vel_rel_x=0;vel_rel_y=0;vel_rel_ang=0;}        //  ...................................................      }    /**     * Ritorno il tipo di moto corrispondente a una stringa     */    private int getTipoDiMoto(String s)      { if ("traslatorio".equals(s))          return TRASLATORIO;        else if ("rotatorio".equals(s))          return ROTATORIO;        else          return NESSUNO;      }  }
+package cinemat;
+
+import ui.Parameters;
+import ui.NoParameters;
+
+/**
+ * This class contains the settings for the experiment
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ *   moto_base      one of "rotatorio", "traslatorio" 
+ *   moto_relativo  one of "rotatorio", "traslatorio", "nessuno"
+ *   vel_base       -10.0 ... 10.0
+ *   acc_base       -5.0  ... 5.0
+ *   vel_ang_base   -5.0  ... 5.0
+ *   x0              -100 ... 100 (default 0)
+ *   raggio         0.1   ... 10.0
+ *   vel_rel_x      -20.0 ... 20.0
+ *   vel_rel_y      -20.0 ... 20.0
+ *   vel_rel_ang    -10.0 ... 10.0
+ */
+public class Settings
+  { 
+    // Tipi di campo
+    public static final int TRASLATORIO=0;
+    public static final int ROTATORIO=1;
+    public static final int NESSUNO=2;
+
+    public static final int TIPI_DI_MOTO_BASE=2;
+    public static final int TIPI_DI_MOTO_RELATIVO=3;
+
+    public int ForcedSimulation=0;    // 1.......Moto Uniforme
+                                      // 2.......Moto Uniformemente Accelerato
+    public boolean ShowProjection=true;
+    public int moto_base;
+    public int moto_relativo;
+
+    public double vel_base;
+    public double acc_base;
+    public double vel_ang_base;
+    public double raggio;
+    public double x0;
+
+    public double vel_rel_x;
+    public double vel_rel_y;
+    public double vel_rel_ang;
+
+    public Settings()
+      { this(new NoParameters());
+      }
+
+    /**
+     * Use the Paremeters object for the default value of the fields
+     */
+    public Settings(Parameters parm)
+      {
+
+        // Controllo tipo di moto e simulazioni forzate
+
+        moto_base=getTipoDiMoto(parm.getString("moto_base", "NONE"));
+        if (moto_base==NESSUNO)
+           {moto_base=TRASLATORIO;ForcedSimulation=parm.getInt("Forced",0,0,2);}
+          else if (moto_base==TRASLATORIO) {ForcedSimulation=parm.getInt("Forced",0,1,2);}
+          else if (moto_base==ROTATORIO) {
+                                          ForcedSimulation=parm.getInt("Forced",0,3,4);
+                                          
+                                          if (ForcedSimulation==3){ShowProjection=false;}
+                                                else
+                                                                  {ShowProjection=true;}
+                                         }
+
+        // System.out.println("FS:" + ForcedSimulation);
+
+        
+        moto_relativo=getTipoDiMoto(
+               parm.getString("moto_relativo", "nessuno"));
+
+
+
+        // Carico valori parametri del moto
+
+        vel_base=parm.getDouble("vel_base", 1, -10, 10);
+       
+        
+        if (ForcedSimulation==1) {acc_base=0;}
+        else {acc_base=parm.getDouble("acc_base", 0, -5, 5);}
+
+        if ((acc_base==0) && ForcedSimulation==2) {acc_base=1;}
+
+        vel_ang_base=parm.getDouble("vel_ang_base", 1, -5, 5);
+        raggio=parm.getDouble("raggio", 1, 0.1, 10);
+        vel_rel_x=parm.getDouble("vel_rel_x", 0, -20, 20);
+        vel_rel_y=parm.getDouble("vel_rel_y", 0, -20, 20);
+        vel_rel_ang=parm.getDouble("vel_rel_ang", 0, -10, 10);
+        x0=parm.getDouble("x0", 0, -100, 100);
+
+
+        // .....................................
+        // Commentando questa riga  possibile permettere la specificazione di un moto
+        // relativo anche per le simulazioni Forced
+        if (ForcedSimulation!=0) {moto_relativo=NESSUNO;vel_rel_x=0;vel_rel_y=0;vel_rel_ang=0;}
+
+        //  ...................................................
+
+      }
+
+    /**
+     * Ritorno il tipo di moto corrispondente a una stringa
+     */
+    private int getTipoDiMoto(String s)
+      { if ("traslatorio".equals(s))
+          return TRASLATORIO;
+        else if ("rotatorio".equals(s))
+          return ROTATORIO;
+        else
+          return NESSUNO;
+      }
+  }

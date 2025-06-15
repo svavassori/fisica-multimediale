@@ -1,1 +1,20 @@
---------------------Configuration: Lemonnier - Java Virtual Machine Debug--------------------Begining build with project "Z:\lm\Lemonnier.dsp", at root.Active configuration is Java Virtual Machine Java Project (based on Java Virtual Machine Java Project)Project's tools are:			"Java Compiler" with flags "/g "			"Custom Build" with flags ""			"<Component 0xa>" with flags ""Creating temp file "C:\WINDOWS\TEMP\RSP13A0.TMP" with contents <Z:\lm\ui\WindowsTracker.java>Compiling...Microsoft (R) Visual J++ Compiler Version 1.02.4337Copyright (C) Microsoft Corp 1996-1997. All rights reserved.Z:\lm\ui\WindowsTracker.java(3,8) : error J0051: Undefined package 'java.awt.event.*'Error executing jvc.exe.Lemonnier - 1 error(s), 0 warning(s)
+--------------------Configuration: Lemonnier - Java Virtual Machine Debug--------------------
+Begining build with project "Z:\lm\Lemonnier.dsp", at root.
+Active configuration is Java Virtual Machine Java Project (based on Java Virtual Machine Java Project)
+
+Project's tools are:
+			"Java Compiler" with flags "/g "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating temp file "C:\WINDOWS\TEMP\RSP13A0.TMP" with contents <Z:\lm\ui\WindowsTracker.java>
+Compiling...
+Microsoft (R) Visual J++ Compiler Version 1.02.4337
+Copyright (C) Microsoft Corp 1996-1997. All rights reserved.
+
+Z:\lm\ui\WindowsTracker.java(3,8) : error J0051: Undefined package 'java.awt.event.*'
+Error executing jvc.exe.
+
+
+
+Lemonnier - 1 error(s), 0 warning(s)

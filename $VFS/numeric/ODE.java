@@ -1,1 +1,34 @@
-/* * ODE.java * Utility interface for the definition of Ordinary Differential Equations * systems. */package numeric;/** * Representation of an Ordinary Differential Equations system; * the system has the form: *   y' = f(x,y) * where x is a scalar and y is a vector * @author Pasquale Foggia * @version 0.99, 16 Dec 1997 */public interface ODE  {    /**     * Returns the dimension of the system (number of equations)     */    int getDimension();        /**     * Computes the derivative of the system     * @param x  the value of independent variable     * @param y  the vector of values of the dependent variables     * @param y1 the vector of values of the derivatives of the     *           dependent variables     */    void derive(double x, double y[], double y1[]);  }
+/*
+ * ODE.java
+ * Utility interface for the definition of Ordinary Differential Equations
+ * systems.
+ */
+
+package numeric;
+
+/**
+ * Representation of an Ordinary Differential Equations system;
+ * the system has the form:
+ *   y' = f(x,y)
+ * where x is a scalar and y is a vector
+ * @author Pasquale Foggia
+ * @version 0.99, 16 Dec 1997
+ */
+public interface ODE
+  {
+    /**
+     * Returns the dimension of the system (number of equations)
+     */
+    int getDimension();
+    
+
+    /**
+     * Computes the derivative of the system
+     * @param x  the value of independent variable
+     * @param y  the vector of values of the dependent variables
+     * @param y1 the vector of values of the derivatives of the
+     *           dependent variables
+     */
+    void derive(double x, double y[], double y1[]);
+  }
+

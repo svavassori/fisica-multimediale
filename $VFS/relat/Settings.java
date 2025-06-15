@@ -1,1 +1,10 @@
-package relat;/** * This class contains the settings for the experiment */public class Settings  { double massa=1.0; // massa a riposo    double forza=1.0;    double maxSpeed=0.9; // wrt light speed  }
+package relat;
+
+/**
+ * This class contains the settings for the experiment
+ */
+public class Settings
+  { double massa=1.0; // massa a riposo
+    double forza=1.0;
+    double maxSpeed=0.9; // wrt light speed
+  }

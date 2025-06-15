@@ -1,1 +1,94 @@
-package ui;import java.awt.*;import java.util.*;/** * A layout manager in which constraints are expressed as * proportional to other components part * @see ui.PropConstraints * @see ui.PropConstraint * @author Pasquale Foggia * @version 0.99, Dec 1997 */public class PropLayout implements LayoutManager  { Hashtable comptable;    PropConstraints defaultConstraints;    public PropLayout()      { comptable=new Hashtable();        defaultConstraints=new PropConstraints();      }    public void setConstraints(Component comp, PropConstraints constraints)      { comptable.put(comp, constraints);      }    PropConstraints lookupConstraints(Component comp)      { PropConstraints c=(PropConstraints)comptable.get(comp);        return c==null? defaultConstraints: c;      }    public void addLayoutComponent(String name, Component comp)      {      }    public void removeLayoutComponent(Component comp)      {      }    public Dimension preferredLayoutSize(Container parent)      { return minimumLayoutSize(parent);      }    public Dimension minimumLayoutSize(Container parent)      { Dimension d=parent.size();        Point l=parent.location();        parent.resize(10, 10);        layoutContainer(parent);        Dimension min= parent.size();        parent.reshape(l.x, l.y, d.width, d.height);        return min;      }        boolean in_layout=false;    public void layoutContainer(Container parent)      { int count=comptable.size();        int attempts=count+count/3+7;        boolean modified=true;        synchronized(this)          { if (in_layout)              return;            in_layout=true;          }        while (attempts-- > 0 && modified)          { Enumeration k=comptable.keys();            modified=false;            while (k.hasMoreElements())              { Component com=(Component)k.nextElement();                PropConstraints pc=lookupConstraints(com);                modified=modified || pc.compute(com);              }          }        synchronized(this)          { in_layout=false;          }                }  }
+package ui;
+
+
+import java.awt.*;
+import java.util.*;
+
+/**
+ * A layout manager in which constraints are expressed as
+ * proportional to other components part
+ * @see ui.PropConstraints
+ * @see ui.PropConstraint
+ * @author Pasquale Foggia
+ * @version 0.99, Dec 1997
+ */
+public class PropLayout implements LayoutManager
+  { Hashtable comptable;
+    PropConstraints defaultConstraints;
+
+
+    public PropLayout()
+      { comptable=new Hashtable();
+        defaultConstraints=new PropConstraints();
+      }
+
+    public void setConstraints(Component comp, PropConstraints constraints)
+      { comptable.put(comp, constraints);
+      }
+
+    PropConstraints lookupConstraints(Component comp)
+      { PropConstraints c=(PropConstraints)comptable.get(comp);
+
+        return c==null? defaultConstraints: c;
+      }
+
+    public void addLayoutComponent(String name, Component comp)
+      {
+      }
+
+    public void removeLayoutComponent(Component comp)
+      {
+      }
+
+    public Dimension preferredLayoutSize(Container parent)
+      { return minimumLayoutSize(parent);
+      }
+
+    public Dimension minimumLayoutSize(Container parent)
+      { Dimension d=parent.size();
+        Point l=parent.location();
+
+        parent.resize(10, 10);
+
+        layoutContainer(parent);
+
+        Dimension min= parent.size();
+        parent.reshape(l.x, l.y, d.width, d.height);
+
+        return min;
+      }
+
+    
+
+    boolean in_layout=false;
+
+    public void layoutContainer(Container parent)
+      { int count=comptable.size();
+        int attempts=count+count/3+7;
+        boolean modified=true;
+
+        synchronized(this)
+          { if (in_layout)
+              return;
+
+            in_layout=true;
+          }
+
+        while (attempts-- > 0 && modified)
+          { Enumeration k=comptable.keys();
+            modified=false;
+
+            while (k.hasMoreElements())
+              { Component com=(Component)k.nextElement();
+                PropConstraints pc=lookupConstraints(com);
+                modified=modified || pc.compute(com);
+              }
+
+          }
+
+        synchronized(this)
+          { in_layout=false;
+          }
+          
+      }
+  }

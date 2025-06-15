@@ -1,1 +1,22 @@
-package ui.animlabel;import java.awt.*;/** * This is a packet of data sent from the animated label to * each animation. An animation can change any of the fields. */public class Token  { char ch;           // Character to be displayed    Color color;    Color next_color;  // Color for the next characters    Point pos;         // Position of the char    Point next_pos;    // Position for the next char    Font font;         // Font for the char    Font next_font;    // Font for the next chars    String text;       // The text being displayed  }
+package ui.animlabel;
+
+import java.awt.*;
+
+/**
+ * This is a packet of data sent from the animated label to
+ * each animation. An animation can change any of the fields.
+ */
+public class Token
+  { char ch;           // Character to be displayed
+    Color color;
+    Color next_color;  // Color for the next characters
+    Point pos;         // Position of the char
+    Point next_pos;    // Position for the next char
+    Font font;         // Font for the char
+    Font next_font;    // Font for the next chars
+    String text;       // The text being displayed
+  }
+
+
+
+

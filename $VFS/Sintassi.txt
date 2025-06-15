@@ -1,1 +1,144 @@
-TUTTI	simulfile=xxxxxx	bufferfile=yyyyyy	ontop=si/no 	fullscreen=si/nosimulfile  è il path name completo del file simul.txt (c:\simul.txt) ebufferfile è il path name completo del file buffer            per comandare il demone (C:\lm\buffer)ontop      specifica se si deve bloccare la simulazione sempre in primo           piano o menofullscreen indica se si deve fare la visualizzazione a tuto schermo del 			"laboratorio" javaDi standard i file sono messi nella directoryWin95:	C:\Windows\JavaMac:	/[nome disco]/System Folders/PreferencesCINEMAT/** * This class contains the settings for the experiment * The following parameters can be used to construct a  * an object through a Parameters instance: *   moto_base      one of "rotatorio", "traslatorio"  *   moto_relativo  one of "rotatorio", "traslatorio", "nessuno" *   vel_base       -10.0 ... 10.0 *   acc_base       -5.0  ... 5.0 *   vel_ang_base   -5.0  ... 5.0 *   raggio         0.1   ... 10.0 *   vel_rel_x      -20.0 ... 20.0 *   vel_rel_y      -20.0 ... 20.0 *   vel_rel_ang    -10.0 ... 10.0 */FISMOD/** * The following parameters can be used to construct a  * an object through a Parameters instance: *   moto_base      one of "bohr", "compton", "spettro" */CIRCUITIno parameters...DINAM1no parameters...DINAM2no parameters...ELEMAGno parameters...GAS/** * This class contains the settings for the experiment * The following parameters can be used to construct a  * an object through a Parameters instance: *   tipo		one of "browniano", "nmolecole" *   dati		one of "P+T", "rho+T", "P+rho" *   p			1000.0	...	1e7 *   rho		2.5E-5	...	2.5E2	 *   t			10.0	...	1e4 */ONDEno parameters...OSCILL/** * This class contains the settings for the experiment * The following parameters can be used to construct a  * an object through a Parameters instance: * ampiezza1       0.1 ... 10.0 * frequenza1      1.0 ... 100.0 * fase1          -180 ... 180 * smorzamento1    0.0 ... 1.0 * ampiezza2       0.1 ... 10.0 * frequenza2      1.0 ... 100.0 * fase2          -180 ... 180 * smorzamento2    0.0 ... 1.0 */OTTICA/** * This class contains the settings for the experiment * The following parameters can be used to construct a  * an object through a Parameters instance: * tipo			one of lente, prisma, lastra, superficie * materiale		one of acqua, quarzo, crown, flint, user * rifraz_rosso		1.00 ... 4.00 * rifraz_giallo	1.00 ... 4.00 * rifraz_blu		1.00 ... 4.00 * tipo_lente           one of biconvessa, biconcava,  *                             piano_convessa_sinistra, piano_convessa_destra, *                             piano_concava_sinistra, piano_concava_destra, *                             menisco_sinistra, menisco_destra * lente_raggio_1       0.1 ... 1000 * lente_raggio_2       0.1 ... 1000 * prisma_angolo        one of 0, 45, 90, 135, 180, 225, 270, 315 * lastra_spessore      0.05 ... 1 * tipo_superficie      one of piana, convessa, concava * superficie_riflettente    true/false * superficie_raggio    0.5 ... 1000 *  */RELATno parameters...    String classlist[] ={"",        "cinemat.Cinemat",         "cinemat.Cinemat",         "cinemat.Cinemat",        "fismod.FisMod",        "fismod.FisMod",        "fismod.FisMod",        "circuiti.Circuiti",        "dinam1.Dinam1",        "dinam2.Dinam2",        "elemag.EleMag",        "gas.Gas",        "onde.Onde",        "oscill.Oscill",        "ottica.Ottica",        "relat.Relat"    };        String paramlist[][] ={ {""},        {"moto_base=rotatorio"},        {"moto_base=traslatorio","vel_base=2"},        {"moto_base=traslatorio","vel_base=3","acc_base=5"},        {"tipo=bohr"},        {"tipo=spettro"},        {"tipo=compton"},        {""},        {""},        {""},        {""},        {""},        {""},        {""},        {""},        {""}    };
+TUTTI
+	simulfile=xxxxxx
+	bufferfile=yyyyyy
+	ontop=si/no 
+	fullscreen=si/no
+simulfile  è il path name completo del file simul.txt (c:\simul.txt) e
+bufferfile è il path name completo del file buffer 
+           per comandare il demone (C:\lm\buffer)
+ontop      specifica se si deve bloccare la simulazione sempre in primo
+           piano o meno
+fullscreen indica se si deve fare la visualizzazione a tuto schermo del 
+			"laboratorio" java
+Di standard i file sono messi nella directory
+Win95:	C:\Windows\Java
+Mac:	/[nome disco]/System Folders/Preferences
+
+CINEMAT
+/**
+ * This class contains the settings for the experiment
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ *   moto_base      one of "rotatorio", "traslatorio" 
+ *   moto_relativo  one of "rotatorio", "traslatorio", "nessuno"
+ *   vel_base       -10.0 ... 10.0
+ *   acc_base       -5.0  ... 5.0
+ *   vel_ang_base   -5.0  ... 5.0
+ *   raggio         0.1   ... 10.0
+ *   vel_rel_x      -20.0 ... 20.0
+ *   vel_rel_y      -20.0 ... 20.0
+ *   vel_rel_ang    -10.0 ... 10.0
+ */
+
+FISMOD
+/**
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ *   moto_base      one of "bohr", "compton", "spettro" 
+*/
+
+CIRCUITI
+no parameters...
+
+DINAM1
+no parameters...
+
+DINAM2
+no parameters...
+
+ELEMAG
+no parameters...
+
+GAS
+/**
+ * This class contains the settings for the experiment
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ *   tipo		one of "browniano", "nmolecole"
+ *   dati		one of "P+T", "rho+T", "P+rho"
+ *   p			1000.0	...	1e7
+ *   rho		2.5E-5	...	2.5E2	
+ *   t			10.0	...	1e4
+ */
+
+ONDE
+no parameters...
+
+OSCILL
+/**
+ * This class contains the settings for the experiment
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ * ampiezza1       0.1 ... 10.0
+ * frequenza1      1.0 ... 100.0
+ * fase1          -180 ... 180
+ * smorzamento1    0.0 ... 1.0
+ * ampiezza2       0.1 ... 10.0
+ * frequenza2      1.0 ... 100.0
+ * fase2          -180 ... 180
+ * smorzamento2    0.0 ... 1.0
+ */
+
+OTTICA
+/**
+ * This class contains the settings for the experiment
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ * tipo			one of lente, prisma, lastra, superficie
+ * materiale		one of acqua, quarzo, crown, flint, user
+ * rifraz_rosso		1.00 ... 4.00
+ * rifraz_giallo	1.00 ... 4.00
+ * rifraz_blu		1.00 ... 4.00
+ * tipo_lente           one of biconvessa, biconcava, 
+ *                             piano_convessa_sinistra, piano_convessa_destra,
+ *                             piano_concava_sinistra, piano_concava_destra,
+ *                             menisco_sinistra, menisco_destra
+ * lente_raggio_1       0.1 ... 1000
+ * lente_raggio_2       0.1 ... 1000
+ * prisma_angolo        one of 0, 45, 90, 135, 180, 225, 270, 315
+ * lastra_spessore      0.05 ... 1
+ * tipo_superficie      one of piana, convessa, concava
+ * superficie_riflettente    true/false
+ * superficie_raggio    0.5 ... 1000
+ * 
+ */
+
+RELAT
+no parameters...
+
+
+    String classlist[] ={"",
+        "cinemat.Cinemat", 
+        "cinemat.Cinemat", 
+        "cinemat.Cinemat",
+        "fismod.FisMod",
+        "fismod.FisMod",
+        "fismod.FisMod",
+        "circuiti.Circuiti",
+        "dinam1.Dinam1",
+        "dinam2.Dinam2",
+        "elemag.EleMag",
+        "gas.Gas",
+        "onde.Onde",
+        "oscill.Oscill",
+        "ottica.Ottica",
+        "relat.Relat"
+    };
+    
+    String paramlist[][] ={ {""},
+        {"moto_base=rotatorio"},
+        {"moto_base=traslatorio","vel_base=2"},
+        {"moto_base=traslatorio","vel_base=3","acc_base=5"},
+        {"tipo=bohr"},
+        {"tipo=spettro"},
+        {"tipo=compton"},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""}
+    };

@@ -1,1 +1,52 @@
-package ui;import java.awt.*;import java.util.*;/** * This class is a placeholder for user interface elements that must * be shared among the user interface components, like the * image loader and the help displayer */public class UserInterface  { private static ImageLoader il;    private static HelpDisplayer help;    /*private static Frame dummyFrame;    static      { dummyFrame=new Frame();        if (dummyFrame.getPeer()==null)          dummyFrame.addNotify();      }*/    static public void setImageLoader(ImageLoader il)      { UserInterface.il=il;      }    static public ImageLoader getImageLoader()      { return il;      }    static public void setHelpDisplayer(HelpDisplayer help)      { UserInterface.help=help;      }    static public HelpDisplayer getHelpDisplayer()      { return help;      }    static public Window getDummyFrame() {        /*if (WindowsTracker.firstwin!=null)            return WindowsTracker.firstwin;        else            return dummyFrame;*/        return WindowsTracker.getLastOpenedWin();    }}
+package ui;
+
+import java.awt.*;
+
+import java.util.*;
+
+
+/**
+ * This class is a placeholder for user interface elements that must
+ * be shared among the user interface components, like the
+ * image loader and the help displayer
+ */
+public class UserInterface
+  { private static ImageLoader il;
+    private static HelpDisplayer help;
+    /*private static Frame dummyFrame;
+
+    static
+      { dummyFrame=new Frame();
+        if (dummyFrame.getPeer()==null)
+          dummyFrame.addNotify();
+      }*/
+
+    static public void setImageLoader(ImageLoader il)
+      { UserInterface.il=il;
+      }
+
+    static public ImageLoader getImageLoader()
+      { return il;
+      }
+
+    static public void setHelpDisplayer(HelpDisplayer help)
+      { UserInterface.help=help;
+      }
+
+    static public HelpDisplayer getHelpDisplayer()
+      { return help;
+      }
+
+
+    static public Window getDummyFrame() {
+
+        /*if (WindowsTracker.firstwin!=null)
+
+            return WindowsTracker.firstwin;
+
+        else
+
+            return dummyFrame;*/
+        return WindowsTracker.getLastOpenedWin();
+    }
+}

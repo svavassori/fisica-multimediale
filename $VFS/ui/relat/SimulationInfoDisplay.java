@@ -1,1 +1,114 @@
-package relat;import ui.*;import util.*;import relat.*;import java.awt.*;/** * A panel displaying information on the simulation */public class SimulationInfoDisplay extends Panel  {     static Color dark=new Color(64,64,64);    static Color light=Color.white;    static Color valueColor=Color.blue;    static Color legendColor=Color.black;    int n;    Label legend[], value[];    int idx[];    Simulation simulation;    public SimulationInfoDisplay()      { simulation=null;        setFont(new Font("Courier", Font.PLAIN, 12));        n=0;        setLayout(null);      }    public void set(Simulation simulation)      { FontMetrics fm=getFontMetrics(getFont());        this.simulation=simulation;        int i;        for(i=0; i<n; i++)          { remove(legend[i]);            remove(value[i]);          }        legend=null;        value=null;        n=0;        if (simulation!=null)          { idx=simulation.getInterestingInfo();            n=idx.length;            if (n>0)              { legend=new Label[n];                value=new Label[n];                for(i=0; i<n; i++)                  { legend[i]=new Label(simulation.getOutputShortName(idx[i]));                    legend[i].setForeground(legendColor);                    add(legend[i]);                    value[i]=new Label("");                    value[i].setForeground(valueColor);                    add(value[i]);                  }                layout();              }            repaint();          }              }    public void update(int step)      { int i;        if (step<simulation.getStepCount())          { for(i=0; i<n; i++)              value[i].setText(Format.format_e("11.3",                                   simulation.getOutput(idx[i], step)));          }        else          { for(i=0; i<n; i++)              value[i].setText("");          }      }    public Dimension preferredSize()      { FontMetrics fm=getFontMetrics(getFont());        return new Dimension(60*fm.charWidth('A')+10, 6*fm.getHeight()+10);      }    public Dimension minimumSize()      { return preferredSize();      }    public void paint(Graphics g)      { Dimension d=size();        g.setColor(light);        g.drawLine(0, 0, 0, d.height-1);        g.drawLine(0, 0, d.width-1, 0);        g.setColor(dark);        g.drawLine(d.width-1, 0, d.width-1, d.height-1);        g.drawLine(0, d.height-1, d.width-1, d.height-1);       }    public void layout()      { FontMetrics fm=getFontMetrics(getFont());        int w=fm.charWidth('A')*12;        int h=fm.getHeight();        int a=fm.getAscent();        int i;        for(i=0; i<n; i++)          { legend[i].reshape((i%5)*w+4, 2*(i/5)*h+4, w, h);            value[i].reshape((i%5)*w+4, (2*(i/5)+1)*h+4, w, h);          }      }  }
+package relat;
+
+import ui.*;
+import util.*;
+import relat.*;
+
+import java.awt.*;
+
+/**
+ * A panel displaying information on the simulation
+ */
+public class SimulationInfoDisplay extends Panel
+  { 
+    static Color dark=new Color(64,64,64);
+    static Color light=Color.white;
+    static Color valueColor=Color.blue;
+    static Color legendColor=Color.black;
+
+    int n;
+    Label legend[], value[];
+    int idx[];
+
+
+    Simulation simulation;
+
+    public SimulationInfoDisplay()
+      { simulation=null;
+        setFont(new Font("Courier", Font.PLAIN, 12));
+        n=0;
+        setLayout(null);
+      }
+
+    public void set(Simulation simulation)
+      { FontMetrics fm=getFontMetrics(getFont());
+        this.simulation=simulation;
+        int i;
+        for(i=0; i<n; i++)
+          { remove(legend[i]);
+            remove(value[i]);
+          }
+        legend=null;
+        value=null;
+        n=0;
+
+        if (simulation!=null)
+          { idx=simulation.getInterestingInfo();
+            n=idx.length;
+            if (n>0)
+              { legend=new Label[n];
+                value=new Label[n];
+                for(i=0; i<n; i++)
+                  { legend[i]=new Label(simulation.getOutputShortName(idx[i]));
+                    legend[i].setForeground(legendColor);
+                    add(legend[i]);
+                    value[i]=new Label("");
+                    value[i].setForeground(valueColor);
+                    add(value[i]);
+                  }
+                layout();
+              }
+            repaint();
+          }
+        
+      }
+
+    public void update(int step)
+      { int i;
+        if (step<simulation.getStepCount())
+          { for(i=0; i<n; i++)
+              value[i].setText(Format.format_e("11.3", 
+                                  simulation.getOutput(idx[i], step)));
+          }
+        else
+          { for(i=0; i<n; i++)
+              value[i].setText("");
+          }
+      }
+
+    public Dimension preferredSize()
+      { FontMetrics fm=getFontMetrics(getFont());
+        return new Dimension(60*fm.charWidth('A')+10, 6*fm.getHeight()+10);
+      }
+
+    public Dimension minimumSize()
+      { return preferredSize();
+      }
+
+    public void paint(Graphics g)
+      { Dimension d=size();
+
+        g.setColor(light);
+        g.drawLine(0, 0, 0, d.height-1);
+        g.drawLine(0, 0, d.width-1, 0);
+
+        g.setColor(dark);
+        g.drawLine(d.width-1, 0, d.width-1, d.height-1);
+        g.drawLine(0, d.height-1, d.width-1, d.height-1); 
+
+      }
+
+    public void layout()
+      { FontMetrics fm=getFontMetrics(getFont());
+        int w=fm.charWidth('A')*12;
+        int h=fm.getHeight();
+        int a=fm.getAscent();
+
+        int i;
+        for(i=0; i<n; i++)
+          { legend[i].reshape((i%5)*w+4, 2*(i/5)*h+4, w, h);
+            value[i].reshape((i%5)*w+4, (2*(i/5)+1)*h+4, w, h);
+          }
+      }
+
+  }

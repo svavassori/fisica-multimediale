@@ -1,1 +1,4 @@
-mkdir L:\backup_lmcopy  /s /m *.java L:\backup_lm
+mkdir L:\backup_lm
+copy  /s /m *.java L:\backup_lm
+
+

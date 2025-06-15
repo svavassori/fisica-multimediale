@@ -1,1 +1,96 @@
-package circuiti;import util.*;import java.awt.*;/** * Un induttore */public class Induttore extends Componente  { double L;    public Induttore(double L)      { this.L=L;      }    public double getL()      { return L;      }    public String toString()      { return "Induttore L="+Format.format_e(".5", L)+" H";      }    public void paint(Graphics g, int x1, int y1, int x2, int y2)      { paintOrientation(g, x1, y1, x2, y2);        g.setColor(Color.black);        int xx1=Math.min(x1, x2);        int xx2=Math.max(x1, x2);        int yy1=Math.min(y1, y2);        int yy2=Math.max(y1, y2);        int dx=xx2-xx1;        int dy=yy2-yy1;        int d=Math.max(dx, dy);        if (dx==0)          { g.drawLine(xx1, yy1, xx1, yy1+d/5);            g.drawArc(xx1-d/8, yy1+d/5,         2*d/8, 3*d/10, -90, 180);            g.drawArc(xx1-d/8, yy1+d/5+ 1*d/10, 2*d/8, d/5, 90, 180);            g.drawArc(xx1-d/8, yy1+d/5+ 1*d/10, 2*d/8, 3*d/10, -90, 180);            g.drawArc(xx1-d/8, yy1+d/5+ 2*d/10, 2*d/8, d/5, 90, 180);            g.drawArc(xx1-d/8, yy1+d/5+ 2*d/10, 2*d/8, 3*d/10, -90, 180);            g.drawArc(xx1-d/8, yy1+d/5+ 3*d/10, 2*d/8, d/5, 90, 180);            g.drawArc(xx1-d/8, yy1+d/5+ 3*d/10, 2*d/8, 3*d/10, -90, 180);            g.drawLine(xx2, yy2, xx2, yy1+d/5+6*d/10);          }        else          { g.drawLine(xx1, yy1, xx1+d/5, yy1);            g.drawArc(xx1+d/5,        yy1-d/8, 3*d/10, 2*d/8, 0, 180);            g.drawArc(xx1+d/5+1*d/10, yy1-d/8,  1*d/5, 2*d/8, 180, 180);            g.drawArc(xx1+d/5+1*d/10, yy1-d/8, 3*d/10, 2*d/8, 0, 180);            g.drawArc(xx1+d/5+2*d/10, yy1-d/8,  1*d/5, 2*d/8, 180, 180);            g.drawArc(xx1+d/5+2*d/10, yy1-d/8, 3*d/10, 2*d/8, 0, 180);            g.drawArc(xx1+d/5+3*d/10, yy1-d/8,  1*d/5, 2*d/8, 180, 180);            g.drawArc(xx1+d/5+3*d/10, yy1-d/8, 3*d/10, 2*d/8, 0, 180);            g.drawLine(xx2, yy2, xx1+d/5+6*d/10, yy2);          }      }    public int getInfoCount()      { return super.getInfoCount()+1;      }    public String getInfoName(int type)      { int sup=super.getInfoCount();        String names[]={"Energia"};        if (type<sup)          return super.getInfoName(type);        else          return names[type-sup];      }    public String getInfoShortName(int type)      { int sup=super.getInfoCount();        String names[]={"E[J]"};        if (type<sup)          return super.getInfoShortName(type);        else          return names[type-sup];      }    public double getInfo(int type, double V, double I)      { int sup=super.getInfoCount();        if (type<sup)          return super.getInfo(type, V, I);        switch(type-sup)          { case 0:              return 0.5*L*I*I;            default:              throw new IllegalArgumentException();          }      }  }
+package circuiti;
+
+import util.*;
+import java.awt.*;
+
+/**
+ * Un induttore
+ */
+public class Induttore extends Componente
+  { double L;
+
+    public Induttore(double L)
+      { this.L=L;
+      }
+
+    public double getL()
+      { return L;
+      }
+
+    public String toString()
+      { return "Induttore L="+Format.format_e(".5", L)+" H";
+      }
+
+    public void paint(Graphics g, int x1, int y1, int x2, int y2)
+      { paintOrientation(g, x1, y1, x2, y2);
+        g.setColor(Color.black);
+        int xx1=Math.min(x1, x2);
+        int xx2=Math.max(x1, x2);
+        int yy1=Math.min(y1, y2);
+        int yy2=Math.max(y1, y2);
+
+        int dx=xx2-xx1;
+        int dy=yy2-yy1;
+
+        int d=Math.max(dx, dy);
+
+        if (dx==0)
+          { g.drawLine(xx1, yy1, xx1, yy1+d/5);
+            g.drawArc(xx1-d/8, yy1+d/5,         2*d/8, 3*d/10, -90, 180);
+            g.drawArc(xx1-d/8, yy1+d/5+ 1*d/10, 2*d/8, d/5, 90, 180);
+            g.drawArc(xx1-d/8, yy1+d/5+ 1*d/10, 2*d/8, 3*d/10, -90, 180);
+            g.drawArc(xx1-d/8, yy1+d/5+ 2*d/10, 2*d/8, d/5, 90, 180);
+            g.drawArc(xx1-d/8, yy1+d/5+ 2*d/10, 2*d/8, 3*d/10, -90, 180);
+            g.drawArc(xx1-d/8, yy1+d/5+ 3*d/10, 2*d/8, d/5, 90, 180);
+            g.drawArc(xx1-d/8, yy1+d/5+ 3*d/10, 2*d/8, 3*d/10, -90, 180);
+            g.drawLine(xx2, yy2, xx2, yy1+d/5+6*d/10);
+          }
+        else
+          { g.drawLine(xx1, yy1, xx1+d/5, yy1);
+            g.drawArc(xx1+d/5,        yy1-d/8, 3*d/10, 2*d/8, 0, 180);
+            g.drawArc(xx1+d/5+1*d/10, yy1-d/8,  1*d/5, 2*d/8, 180, 180);
+            g.drawArc(xx1+d/5+1*d/10, yy1-d/8, 3*d/10, 2*d/8, 0, 180);
+            g.drawArc(xx1+d/5+2*d/10, yy1-d/8,  1*d/5, 2*d/8, 180, 180);
+            g.drawArc(xx1+d/5+2*d/10, yy1-d/8, 3*d/10, 2*d/8, 0, 180);
+            g.drawArc(xx1+d/5+3*d/10, yy1-d/8,  1*d/5, 2*d/8, 180, 180);
+            g.drawArc(xx1+d/5+3*d/10, yy1-d/8, 3*d/10, 2*d/8, 0, 180);
+            g.drawLine(xx2, yy2, xx1+d/5+6*d/10, yy2);
+          }
+
+      }
+
+    public int getInfoCount()
+      { return super.getInfoCount()+1;
+      }
+
+    public String getInfoName(int type)
+      { int sup=super.getInfoCount();
+        String names[]={"Energia"};
+        if (type<sup)
+          return super.getInfoName(type);
+        else
+          return names[type-sup];
+      }
+
+    public String getInfoShortName(int type)
+      { int sup=super.getInfoCount();
+        String names[]={"E[J]"};
+        if (type<sup)
+          return super.getInfoShortName(type);
+        else
+          return names[type-sup];
+      }
+
+    public double getInfo(int type, double V, double I)
+      { int sup=super.getInfoCount();
+        if (type<sup)
+          return super.getInfo(type, V, I);
+        switch(type-sup)
+          { case 0:
+              return 0.5*L*I*I;
+            default:
+              throw new IllegalArgumentException();
+          }
+      }
+
+  }

@@ -1,1 +1,121 @@
-package dinam1;import java.awt.*;import java.applet.*;import ui.*;import util.Preloader;/*import java.awt.*;import ui.*;public class Dinam1 implements Exit  { Dinam1Frame frame;    public static void main(String args[])      { new Dinam1(args);      }    public Dinam1(String args[])      { ImageLoader ail=new ApplicationImageLoader();        HelpDisplayer help=new TextHelpDisplayer();        Parameters parm=new StringVectorParameters(args);        UserInterface.setImageLoader(ail);        UserInterface.setHelpDisplayer(help);        frame=new Dinam1Frame(this);        frame.show();        frame.toFront();        frame.centerOnScreen();      }    public void exit(Object obj, Object arg)      { if (frame!=null)          { frame.hide();            frame.dispose();          }        System.exit(0);      }  }*/public class Dinam1 extends Dinam1Frame implements Exit { // CinematFrame frame;    public static void main(String args[]) {        Parameters tmpparam=new StringVectorParameters(args);                WindowsTracker.enable(tmpparam.getBoolean("ontop",true));        new Dinam1(args);    }    public Dinam1(String args[]) {        ImageLoader ail=new ApplicationImageLoader();        HelpDisplayer help=new TextHelpDisplayer();        Parameters parm=new StringVectorParameters(args);        UserInterface.setImageLoader(ail);        UserInterface.setHelpDisplayer(help);        Preloader.setSimulFileName (parm.getString("simulfile",Preloader.getSimulFileName()));                super.go( parm, this ) ;        if (!Preloader.isPreloadActive()) {            show();            toFront();        }    }    public void exit(Object obj, Object arg) {        hide();        dispose();        if (!Preloader.isPreloadActive())            System.exit(0);    }}
+package dinam1;
+
+
+import java.awt.*;
+
+import java.applet.*;
+
+import ui.*;
+
+import util.Preloader;
+
+
+
+/*
+import java.awt.*;
+import ui.*;
+
+public class Dinam1 implements Exit
+  { Dinam1Frame frame;
+
+    public static void main(String args[])
+      { new Dinam1(args);
+      }
+
+    public Dinam1(String args[])
+      { ImageLoader ail=new ApplicationImageLoader();
+        HelpDisplayer help=new TextHelpDisplayer();
+        Parameters parm=new StringVectorParameters(args);
+
+        UserInterface.setImageLoader(ail);
+        UserInterface.setHelpDisplayer(help);
+
+        frame=new Dinam1Frame(this);
+        frame.show();
+        frame.toFront();
+
+        frame.centerOnScreen();
+
+      }
+
+    public void exit(Object obj, Object arg)
+      { if (frame!=null)
+          { frame.hide();
+            frame.dispose();
+          }
+        System.exit(0);
+      }
+
+  }
+*/
+
+
+
+public class Dinam1 extends Dinam1Frame implements Exit { // CinematFrame frame;
+
+
+
+    public static void main(String args[]) {
+
+        Parameters tmpparam=new StringVectorParameters(args);        
+
+        WindowsTracker.enable(tmpparam.getBoolean("ontop",true));
+
+        new Dinam1(args);
+
+    }
+
+
+
+    public Dinam1(String args[]) {
+
+        ImageLoader ail=new ApplicationImageLoader();
+
+        HelpDisplayer help=new TextHelpDisplayer();
+
+        Parameters parm=new StringVectorParameters(args);
+
+
+
+        UserInterface.setImageLoader(ail);
+
+        UserInterface.setHelpDisplayer(help);
+
+
+
+        Preloader.setSimulFileName (parm.getString("simulfile",Preloader.getSimulFileName()));
+
+        
+
+        super.go( parm, this ) ;
+
+
+
+        if (!Preloader.isPreloadActive()) {
+
+            show();
+
+            toFront();
+
+        }
+
+    }
+
+
+
+    public void exit(Object obj, Object arg) {
+
+        hide();
+
+        dispose();
+
+        if (!Preloader.isPreloadActive())
+
+            System.exit(0);
+
+    }
+
+
+
+}
+

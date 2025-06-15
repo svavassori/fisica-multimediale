@@ -1,1 +1,246 @@
-package ui;import ui.TooltipButton;import java.awt.*;/** * A button displaying one or two images * @author Pasquale Foggia * @version 0.99, Dec 1997 */public class ImageButton extends TooltipButton  { Image upImage, downImage;    protected boolean selected, pressed;    static Color selectedColor=Color.red;    static Color pressedColor=Color.blue;    String id;    boolean expand=false;    protected int border=2;    protected int padx=2, pady=2;    /**     * @param img  The image to be displayed     */    public ImageButton(Image img)      { this("~ImageButton~",img, img);      }    /**     * @param buttonId  the string reported by the action event     * @param img  The image to be displayed     */    public ImageButton(String buttonId, Image img)      { this(buttonId, img, img);      }    /**     * @param upImg  the image displayed when the button is up     * @param downImg the image displayed when the button is down     */    public ImageButton(Image upImg, Image downImg)      { this("~ImageButton~",upImg, downImg);      }    /**     * @param buttonId  the string reported by the action event     * @param upImg  the image displayed when the button is up     * @param downImg the image displayed when the button is down     */    public ImageButton(String buttonId, Image upImg, Image downImg)      { id=buttonId;        upImage=upImg;        downImage=downImg;        selected=false;        pressed=false;        // FD setBackground(Color.white);      }    /**     * Changes the image of the button     */    public void setImage(Image img)      { setImage(img, img);      }        /**     * Changes the images of the button     */    public void setImage(Image upImg, Image downImg)      { upImage=upImg;        downImage=downImg;        repaint();      }    /**     * Determines if the images must be expanded to fit the button     * or should keep their original size     */    public void setExpand(boolean expand)      { this.expand=expand;      }    /**      * Determines the border width     */    public void setBorder(int border)      { this.border=border;      }    public synchronized Dimension preferredSize()      { int width, height;        while ((width=upImage.getWidth(this))<0)          try { wait(); }          catch (InterruptedException e) { }        while ((height=upImage.getHeight(this))<0)          try { wait(); }          catch (InterruptedException e) { }        return new Dimension(width+2*border+2*padx, height+2*border+2*pady);      }    public synchronized Dimension minimumSize()      { if (expand==true)          return new Dimension(2*border+2*padx+4,2*border+2*pady+4);        else          return preferredSize();      }    public synchronized boolean imageUpdate(Image img, int infoFlags,                                            int x, int y,                                            int width, int height)      { if ((infoFlags & ERROR)!=0)          { System.err.println("Error loading "+img);            System.exit(1);          }          notifyAll();        repaint(50);        return true;      }    public synchronized boolean mouseDown(Event evt, int x, int y)      { super.mouseDown(evt, x, y);        if (!selected || !pressed)          { selected=true;            pressed=true;            repaint();          }        return true;      }    public synchronized boolean mouseUp(Event evt, int x, int y)      { super.mouseUp(evt, x, y);        if (pressed)          {             pressed=false;            repaint();            deliverEvent(new Event(this, Event.ACTION_EVENT, id));          }        return true;      }    public synchronized boolean mouseEnter(Event evt, int x, int y)      {         if (!selected)          { selected=true;            repaint();          }        return super.mouseEnter(evt, x, y);      }    public synchronized boolean mouseExit(Event evt, int x, int y)      {         if (selected || pressed)          { selected=false;            pressed=false;            repaint();          }        return super.mouseExit(evt, x, y);      }    public void update(Graphics g)      { paint(g);      }    public void paint(Graphics real_g)      { Dimension d=preferredSize();        Dimension s=size();        Image backing_store=createImage(s.width, s.height);        if (backing_store==null)          return;        Graphics g=backing_store.getGraphics();        int xx, yy;        g.setColor(getBackground());        g.fillRect(0, 0, s.width, s.height);        d.width-=2*border+2*padx;        d.height-=2*border+2*pady;                if (expand)          { Dimension s1=size();            s1.width-=2*border+2*padx;            s1.height-=2*border+2*pady;            if (s1.width*d.height<s1.height*d.width)              {                 d.height=d.height*s1.width/d.width;                d.width=s1.width;              }            else              { d.width=d.width*s1.height/d.height;                d.height=s1.height;              }          }        xx=(s.width-d.width)/2;        yy=(s.height-d.height)/2;        if (pressed && downImage==upImage)          { xx+=border;            yy+=border;          }        if (expand)          g.drawImage( pressed? downImage: upImage,                          xx, yy, d.width, d.height, this);        else          g.drawImage( pressed? downImage: upImage, xx, yy, this);        int i;        for(i=0; i<border+padx; i++)          { g.drawLine(i, 0, i, s.height-1);            g.drawLine(s.width-1-i, 0, s.width-1-i, s.height-1);          }        for(i=0; i<border+pady; i++)          { g.drawLine(0, i, s.width-1, i);            g.drawLine(0, s.height-1-i, s.width-1, s.height-1-i);          }        paintBorder(g);        g.dispose();        g=null;        real_g.drawImage(backing_store, 0, 0, this);        backing_store.flush();      }    protected void paintBorder(Graphics g)      { Dimension s=size();        if (selected)          { g.setColor(pressed? pressedColor: selectedColor);            g.drawRect(0, 0, s.width-1, s.height-1);            if (pressed)              g.drawRect(1, 1, s.width-3, s.height-3);          }      }  }
+package ui;
+
+import ui.TooltipButton;
+
+import java.awt.*;
+
+/**
+ * A button displaying one or two images
+ * @author Pasquale Foggia
+ * @version 0.99, Dec 1997
+ */
+public class ImageButton extends TooltipButton
+  { Image upImage, downImage;
+    protected boolean selected, pressed;
+    static Color selectedColor=Color.red;
+    static Color pressedColor=Color.blue;
+    String id;
+    boolean expand=false;
+
+    protected int border=2;
+    protected int padx=2, pady=2;
+
+
+    /**
+     * @param img  The image to be displayed
+     */
+    public ImageButton(Image img)
+      { this("~ImageButton~",img, img);
+      }
+
+    /**
+     * @param buttonId  the string reported by the action event
+     * @param img  The image to be displayed
+     */
+    public ImageButton(String buttonId, Image img)
+      { this(buttonId, img, img);
+      }
+
+
+    /**
+     * @param upImg  the image displayed when the button is up
+     * @param downImg the image displayed when the button is down
+     */
+    public ImageButton(Image upImg, Image downImg)
+      { this("~ImageButton~",upImg, downImg);
+      }
+
+    /**
+     * @param buttonId  the string reported by the action event
+     * @param upImg  the image displayed when the button is up
+     * @param downImg the image displayed when the button is down
+     */
+    public ImageButton(String buttonId, Image upImg, Image downImg)
+      { id=buttonId;
+        upImage=upImg;
+        downImage=downImg;
+        selected=false;
+        pressed=false;
+        // FD setBackground(Color.white);
+      }
+
+    /**
+     * Changes the image of the button
+     */
+    public void setImage(Image img)
+      { setImage(img, img);
+      }
+    
+    /**
+     * Changes the images of the button
+     */
+    public void setImage(Image upImg, Image downImg)
+      { upImage=upImg;
+        downImage=downImg;
+        repaint();
+      }
+
+    /**
+     * Determines if the images must be expanded to fit the button
+     * or should keep their original size
+     */
+    public void setExpand(boolean expand)
+      { this.expand=expand;
+      }
+
+    /** 
+     * Determines the border width
+     */
+    public void setBorder(int border)
+      { this.border=border;
+      }
+
+    public synchronized Dimension preferredSize()
+      { int width, height;
+
+        while ((width=upImage.getWidth(this))<0)
+          try { wait(); }
+          catch (InterruptedException e) { }
+        while ((height=upImage.getHeight(this))<0)
+          try { wait(); }
+          catch (InterruptedException e) { }
+
+        return new Dimension(width+2*border+2*padx, height+2*border+2*pady);
+
+      }
+
+    public synchronized Dimension minimumSize()
+      { if (expand==true)
+          return new Dimension(2*border+2*padx+4,2*border+2*pady+4);
+        else
+          return preferredSize();
+      }
+
+    public synchronized boolean imageUpdate(Image img, int infoFlags,
+                                            int x, int y,
+                                            int width, int height)
+      { if ((infoFlags & ERROR)!=0)
+          { System.err.println("Error loading "+img);
+            System.exit(1);
+          }  
+        notifyAll();
+        repaint(50);
+        return true;
+      }
+
+    public synchronized boolean mouseDown(Event evt, int x, int y)
+      { super.mouseDown(evt, x, y);
+        if (!selected || !pressed)
+          { selected=true;
+            pressed=true;
+            repaint();
+          }
+        return true;
+      }
+
+    public synchronized boolean mouseUp(Event evt, int x, int y)
+      { super.mouseUp(evt, x, y);
+        if (pressed)
+          { 
+            pressed=false;
+            repaint();
+            deliverEvent(new Event(this, Event.ACTION_EVENT, id));
+          }
+        return true;
+      }
+
+    public synchronized boolean mouseEnter(Event evt, int x, int y)
+      { 
+        if (!selected)
+          { selected=true;
+            repaint();
+          }
+        return super.mouseEnter(evt, x, y);
+      }
+
+    public synchronized boolean mouseExit(Event evt, int x, int y)
+      { 
+        if (selected || pressed)
+          { selected=false;
+            pressed=false;
+            repaint();
+          }
+        return super.mouseExit(evt, x, y);
+      }
+
+
+    public void update(Graphics g)
+      { paint(g);
+      }
+
+
+
+    public void paint(Graphics real_g)
+      { Dimension d=preferredSize();
+        Dimension s=size();
+        Image backing_store=createImage(s.width, s.height);
+        if (backing_store==null)
+          return;
+        Graphics g=backing_store.getGraphics();
+        int xx, yy;
+
+        g.setColor(getBackground());
+        g.fillRect(0, 0, s.width, s.height);
+
+        d.width-=2*border+2*padx;
+        d.height-=2*border+2*pady;
+        
+        if (expand)
+          { Dimension s1=size();
+            s1.width-=2*border+2*padx;
+            s1.height-=2*border+2*pady;
+            if (s1.width*d.height<s1.height*d.width)
+              { 
+                d.height=d.height*s1.width/d.width;
+                d.width=s1.width;
+              }
+            else
+              { d.width=d.width*s1.height/d.height;
+                d.height=s1.height;
+              }
+          }
+
+        xx=(s.width-d.width)/2;
+        yy=(s.height-d.height)/2;
+
+        if (pressed && downImage==upImage)
+          { xx+=border;
+            yy+=border;
+          }
+
+        if (expand)
+          g.drawImage( pressed? downImage: upImage, 
+                         xx, yy, d.width, d.height, this);
+        else
+          g.drawImage( pressed? downImage: upImage, xx, yy, this);
+
+        int i;
+        for(i=0; i<border+padx; i++)
+          { g.drawLine(i, 0, i, s.height-1);
+            g.drawLine(s.width-1-i, 0, s.width-1-i, s.height-1);
+          }
+        for(i=0; i<border+pady; i++)
+          { g.drawLine(0, i, s.width-1, i);
+            g.drawLine(0, s.height-1-i, s.width-1, s.height-1-i);
+          }
+
+        paintBorder(g);
+        g.dispose();
+        g=null;
+
+        real_g.drawImage(backing_store, 0, 0, this);
+        backing_store.flush();
+      }
+
+
+    protected void paintBorder(Graphics g)
+      { Dimension s=size();
+
+        if (selected)
+          { g.setColor(pressed? pressedColor: selectedColor);
+            g.drawRect(0, 0, s.width-1, s.height-1);
+            if (pressed)
+              g.drawRect(1, 1, s.width-3, s.height-3);
+          }
+      }
+  }

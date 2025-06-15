@@ -1,1 +1,70 @@
-package ui;import java.awt.*;import ui.ImageButton;/** * A button displaying one or two images * @author Pasquale Foggia * @version 0.99, Dec 1997 */public class ImageButton3D extends ImageButton  {     Color light=new Color(224,224,224);//Color.white;    Color dark=new Color(96,96,96);    /**     * @param img  The image to be displayed     */    public ImageButton3D(Image img)      { super(img);        // FD setBackground(Color.lightGray);              }    /**     * @param buttonId  the string reported by the action event     * @param img  The image to be displayed     */    public ImageButton3D(String buttonId, Image img)      { super(buttonId, img);        // FD setBackground(Color.lightGray);      }    /**     * @param upImg  the image displayed when the button is up     * @param downImg the image displayed when the button is down     */    public ImageButton3D(Image upImg, Image downImg)      { super(upImg, downImg);        // FD setBackground(Color.lightGray);      }    /**     * @param buttonId  the string reported by the action event     * @param upImg  the image displayed when the button is up     * @param downImg the image displayed when the button is down     */    public ImageButton3D(String buttonId, Image upImg, Image downImg)      { super(buttonId, upImg, downImg);        // FD setBackground(Color.lightGray);              }    protected void paintBorder(Graphics g)      { Dimension s=size();        int i;        if (selected)          { g.setColor(pressed? dark :light);            for(i=0; i<border; i++)              { g.drawLine(i, i, s.width-1-i, i);                g.drawLine(i, i, i, s.height-1-i);              }            g.setColor(pressed? light: dark);            for(i=0; i<border; i++)              { g.drawLine(s.width-1-i, s.height-1-i, s.width-1-i, i);                g.drawLine(s.width-1-i, s.height-1-i, i, s.height-1-i);              }          }      }  }
+package ui;
+
+import java.awt.*;
+import ui.ImageButton;
+
+/**
+ * A button displaying one or two images
+ * @author Pasquale Foggia
+ * @version 0.99, Dec 1997
+ */
+public class ImageButton3D extends ImageButton
+  { 
+    Color light=new Color(224,224,224);//Color.white;
+    Color dark=new Color(96,96,96);
+
+    /**
+     * @param img  The image to be displayed
+     */
+    public ImageButton3D(Image img)
+      { super(img);
+        // FD setBackground(Color.lightGray);        
+      }
+
+    /**
+     * @param buttonId  the string reported by the action event
+     * @param img  The image to be displayed
+     */
+    public ImageButton3D(String buttonId, Image img)
+      { super(buttonId, img);
+        // FD setBackground(Color.lightGray);
+      }
+
+    /**
+     * @param upImg  the image displayed when the button is up
+     * @param downImg the image displayed when the button is down
+     */
+    public ImageButton3D(Image upImg, Image downImg)
+      { super(upImg, downImg);
+        // FD setBackground(Color.lightGray);
+      }
+
+    /**
+     * @param buttonId  the string reported by the action event
+     * @param upImg  the image displayed when the button is up
+     * @param downImg the image displayed when the button is down
+     */
+    public ImageButton3D(String buttonId, Image upImg, Image downImg)
+      { super(buttonId, upImg, downImg);
+        // FD setBackground(Color.lightGray);
+        
+
+      }
+
+    protected void paintBorder(Graphics g)
+      { Dimension s=size();
+        int i;
+        if (selected)
+          { g.setColor(pressed? dark :light);
+            for(i=0; i<border; i++)
+              { g.drawLine(i, i, s.width-1-i, i);
+                g.drawLine(i, i, i, s.height-1-i);
+              }
+            g.setColor(pressed? light: dark);
+            for(i=0; i<border; i++)
+              { g.drawLine(s.width-1-i, s.height-1-i, s.width-1-i, i);
+                g.drawLine(s.width-1-i, s.height-1-i, i, s.height-1-i);
+              }
+          }
+      }
+  }

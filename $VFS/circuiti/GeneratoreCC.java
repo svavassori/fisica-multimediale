@@ -1,1 +1,40 @@
-package circuiti;import util.*;import java.awt.*;/** * Un generatore di tensione costante */public class GeneratoreCC extends Generatore  { double E;    public GeneratoreCC(double E, double Ri)      { this.E=E;        this.Ri=Ri;      }    public double getE()      { return E;      }    public String toString()      { return "F.e.m. costante "+               "E="+Format.format_e(".5", E)+" V "+               "Ri="+Format.format_e(".5", Ri)+" Ohm";      }    public double getE(double t)      { return E;      }    public void paint(Graphics g, int x1, int y1, int x2, int y2)      { int dx=x2-x1;        int dy=y2-y1;        super.paint(g, x1, y1, x2, y2);        g.setColor(Color.black);        g.drawLine(x1+dx/4+dx/12, y1+dy/4+dy/12, x2-dx/4-dx/12, y2-dy/4-dy/12);      }  }
+package circuiti;
+
+import util.*;
+import java.awt.*;
+
+/**
+ * Un generatore di tensione costante
+ */
+public class GeneratoreCC extends Generatore
+  { double E;
+
+    public GeneratoreCC(double E, double Ri)
+      { this.E=E;
+        this.Ri=Ri;
+      }
+
+
+    public double getE()
+      { return E;
+      }
+
+    public String toString()
+      { return "F.e.m. costante "+
+               "E="+Format.format_e(".5", E)+" V "+
+               "Ri="+Format.format_e(".5", Ri)+" Ohm";
+      }
+
+    public double getE(double t)
+      { return E;
+      }
+
+    public void paint(Graphics g, int x1, int y1, int x2, int y2)
+      { int dx=x2-x1;
+        int dy=y2-y1;
+
+        super.paint(g, x1, y1, x2, y2);
+        g.setColor(Color.black);
+        g.drawLine(x1+dx/4+dx/12, y1+dy/4+dy/12, x2-dx/4-dx/12, y2-dy/4-dy/12);
+      }
+  }

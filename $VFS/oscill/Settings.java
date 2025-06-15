@@ -1,1 +1,50 @@
-package oscill;import ui.Parameters;import ui.NoParameters;/** * This class contains the settings for the experiment * The following parameters can be used to construct a  * an object through a Parameters instance: * ampiezza1       0.1 ... 10.0 * frequenza1      1.0 ... 100.0 * fase1          -180 ... 180 * smorzamento1    0.0 ... 1.0 * ampiezza2       0.1 ... 10.0 * frequenza2      1.0 ... 100.0 * fase2          -180 ... 180 * smorzamento2    0.0 ... 1.0 */public class Settings  { public static final int ONDE=2;    public double ampiezza[];    public double frequenza[];    public int fase[];    public double smorzamento[];    public Settings()      { this(new NoParameters());      }    /**     * Use the Paremeters object for the default value of the fields     */    public Settings(Parameters parm)      { ampiezza=new double[ONDE];         frequenza=new double[ONDE];         fase=new int[ONDE];         smorzamento=new double[ONDE];         int i;        for(i=0; i<ONDE; i++)          { int ii=i+1;            ampiezza[i]=parm.getDouble("ampiezza"+ii, 1.0, 0.1, 10.0);            frequenza[i]=parm.getDouble("frequenza"+ii, 10.0, 1.0, 100.0);            fase[i]=parm.getInt("fase"+ii, 0, -180, 180);            smorzamento[i]=parm.getDouble("smorzamento"+ii, 0.0, 0.0, 1.0);          }      }  }
+package oscill;
+
+import ui.Parameters;
+import ui.NoParameters;
+
+/**
+ * This class contains the settings for the experiment
+ * The following parameters can be used to construct a 
+ * an object through a Parameters instance:
+ * ampiezza1       0.1 ... 10.0
+ * frequenza1      1.0 ... 100.0
+ * fase1          -180 ... 180
+ * smorzamento1    0.0 ... 1.0
+ * ampiezza2       0.1 ... 10.0
+ * frequenza2      1.0 ... 100.0
+ * fase2          -180 ... 180
+ * smorzamento2    0.0 ... 1.0
+ */
+public class Settings
+  { public static final int ONDE=2;
+
+    public double ampiezza[];
+    public double frequenza[];
+    public int fase[];
+    public double smorzamento[];
+
+    public Settings()
+      { this(new NoParameters());
+      }
+
+    /**
+     * Use the Paremeters object for the default value of the fields
+     */
+    public Settings(Parameters parm)
+      { ampiezza=new double[ONDE]; 
+        frequenza=new double[ONDE]; 
+        fase=new int[ONDE]; 
+        smorzamento=new double[ONDE]; 
+        int i;
+        for(i=0; i<ONDE; i++)
+          { int ii=i+1;
+            ampiezza[i]=parm.getDouble("ampiezza"+ii, 1.0, 0.1, 10.0);
+            frequenza[i]=parm.getDouble("frequenza"+ii, 10.0, 1.0, 100.0);
+            fase[i]=parm.getInt("fase"+ii, 0, -180, 180);
+            smorzamento[i]=parm.getDouble("smorzamento"+ii, 0.0, 0.0, 1.0);
+          }
+      }
+
+
+  }

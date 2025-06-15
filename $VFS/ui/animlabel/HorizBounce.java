@@ -1,1 +1,39 @@
-package ui.animlabel;import java.awt.*;/** * Horizontally bouncing text animation */ public class HorizBounce implements Animation  { int amount=10;    int period=3;    public void setBouncingAmount(int amount)      { this.amount=amount;      }    public void setPeriod(int period)      { this.period=period;      }    public void perform(Graphics g, int frame, int idx, Token tok)      { int len=tok.text.length();        int pos=frame/period;        int rest=frame%period;        pos %= 2*len;        if (pos>=len)          { pos=2*len-1-pos;            rest=period-1-rest;          }        if (idx!=pos)          return;        int dx2=amount*rest/period;        int dx1=amount-dx2;        tok.pos.x+=dx1;        tok.next_pos.x+=amount;      }  }
+package ui.animlabel;
+
+import java.awt.*;
+
+/**
+ * Horizontally bouncing text animation
+ */ 
+public class HorizBounce implements Animation
+  { int amount=10;
+    int period=3;
+
+    public void setBouncingAmount(int amount)
+      { this.amount=amount;
+      }
+
+    public void setPeriod(int period)
+      { this.period=period;
+      }
+
+    public void perform(Graphics g, int frame, int idx, Token tok)
+      { int len=tok.text.length();
+
+        int pos=frame/period;
+        int rest=frame%period;
+        pos %= 2*len;
+        if (pos>=len)
+          { pos=2*len-1-pos;
+            rest=period-1-rest;
+          }
+        if (idx!=pos)
+          return;
+        int dx2=amount*rest/period;
+        int dx1=amount-dx2;
+
+        tok.pos.x+=dx1;
+        tok.next_pos.x+=amount;
+      }
+
+  }

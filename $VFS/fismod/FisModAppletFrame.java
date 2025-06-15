@@ -1,1 +1,238 @@
-package fismod;import java.io.*;import ui.*;import java.awt.*;import java.applet.*;public class FisModAppletFrame extends Applet implements StatusDisplayer  { ImageLoader il;    HelpDisplayer help;    Parameters parm;    Exit exit;    Label info_text;    Panel cardsPanel;    CardLayout cards;    SimulationDisplay simulationDisplay;    SimulationBohr    simulationBohr;    SimulationSpettro simulationSpettro;    SimulationCompton simulationCompton;    public void init()      {         il=new AppletImageLoader(this);        help=new AppletHelpDisplayer(this);        parm=new AppletParameters(this);        UserInterface.setImageLoader(il);        UserInterface.setHelpDisplayer(help);        //resize(512, 384);      }    public void start() {        go(parm,exit);    }    //public FisModFrame(Parameters parm, Exit exit)    public void go(Parameters parm, Exit exit) {        //super("Fisica moderna");        il=UserInterface.getImageLoader();        help=UserInterface.getHelpDisplayer();        this.parm=parm;        this.exit=exit;        //setIconImage(il.load("icons/simul.gif"));        //createMenuBar();	    setLayout (new BorderLayout());        createPanel();	    createToolbar();        show();                /*        Event a=new Event(this,Event.ACTION_EVENT,"");        String tipo=parm.getString("tipo", "null");        show("*Blank*");        if ("bohr".equals(tipo))            action(a, "Atomo di Bohr");        else if ("compton".equals(tipo))             action(a, "Effetto Compton...");        else if ("spettro".equals(tipo))             action(a, "Spettro atomico dell'idrogeno...");        */        //createStatus();        //resize(512, 440);        //centerOnScreen();    }    void createToolbar()      { Toolbar tb=new Toolbar(Toolbar.VERTICAL);        String tipo=parm.getString("tipo", "null");        show("*Blank*");        if ("bohr".equals(tipo)) {            tb.addTool("Atomo di Bohr", il.load("icons/atomo.gif"),                    "Atomo di Bohr");            show("Bohr");        } else if ("compton".equals(tipo)) {            tb.addTool("Effetto Compton...", il.load("icons/compton.gif"),                    "Effetto Compton");            show("Compton");        } else if ("spettro".equals(tipo)) {            tb.addTool("Spettro atomico dell'idrogeno...",                     il.load("icons/spettro.gif"),                    "Spettro atomico dell'idrogeno");            show("Spettro");        } else {            tb.addTool("Atomo di Bohr", il.load("icons/atomo.gif"),                    "Atomo di Bohr");            tb.addTool("Spettro atomico dell'idrogeno...",                     il.load("icons/spettro.gif"),                    "Spettro atomico dell'idrogeno");            tb.addTool("Effetto Compton...", il.load("icons/compton.gif"),                    "Effetto Compton");        }        /*tb.addTool("Uscita...", il.load("icons/exit.gif"),                   "Esci dal programma");*/        tb.setStatusDisplayer(this);        add("West", tb);      }    void createPanel()      { cardsPanel=new Panel();        cards=new CardLayout();        cardsPanel.setLayout(cards);        simulationBohr=new SimulationBohr();        cardsPanel.add("Bohr", simulationBohr);        simulationSpettro=new SimulationSpettro();        cardsPanel.add("Spettro", simulationSpettro);        simulationCompton=new SimulationCompton();        cardsPanel.add("Compton", simulationCompton);        // To be continued        add("Center", cardsPanel);        simulationDisplay=simulationBohr;        Panel blank=new Panel();        blank.setBackground(Color.white);        cardsPanel.add("*Blank*", blank);        show("*Blank*");      }    public void show(String name)      { cards.show(cardsPanel, name);        cardsPanel.repaint();      }    public boolean action(Event evt, Object what)      {         if ("Uscita...".equals(what))          MessageBox.confirm(this, "Fisica moderna",                                    "Vuoi uscire dal programma?",                             "*Exit*");        else if ("*Exit*".equals(what))          { simulationDisplay.stopAnimation();            //salva su file C://Simul il numero 1            //salva();                        exit.exit(this, null);          }        else if ("Atomo di Bohr".equals(what))          { simulationDisplay.stopAnimation();            show("Bohr");            simulationDisplay=simulationBohr;            simulationDisplay.startAnimation();            //toFront();          }        else if ("Spettro atomico dell'idrogeno...".equals(what))          { simulationDisplay.stopAnimation();            show("Spettro");            simulationDisplay=simulationSpettro;            simulationDisplay.startAnimation();            //toFront();          }        else if ("Effetto Compton...".equals(what))          { simulationDisplay.stopAnimation();            show("Compton");            simulationDisplay=simulationCompton;            simulationDisplay.startAnimation();            //toFront();          }        else if ("Aiuto".equals(what))          help.displayHelp("help/fismod", "fismod");                return true;      }    public boolean handleEvent(Event evt)      { if (evt.id==Event.WINDOW_DESTROY)          MessageBox.confirm(this, "Fisica moderna",                                "Vuoi uscire dal programma?",                                       "*Exit*");        return super.handleEvent(evt);      }  }
+package fismod;
+
+import java.io.*;
+import ui.*;
+import java.awt.*;
+
+import java.applet.*;
+
+public class FisModAppletFrame extends Applet implements StatusDisplayer
+  { ImageLoader il;
+    HelpDisplayer help;
+    Parameters parm;
+    Exit exit;
+    Label info_text;
+    Panel cardsPanel;
+    CardLayout cards;
+    SimulationDisplay simulationDisplay;
+    SimulationBohr    simulationBohr;
+    SimulationSpettro simulationSpettro;
+    SimulationCompton simulationCompton;
+
+    public void init()
+
+      { 
+
+        il=new AppletImageLoader(this);
+
+        help=new AppletHelpDisplayer(this);
+
+        parm=new AppletParameters(this);
+
+
+
+        UserInterface.setImageLoader(il);
+
+        UserInterface.setHelpDisplayer(help);
+
+        //resize(512, 384);
+
+      }
+
+
+
+    public void start() {
+
+        go(parm,exit);
+
+    }
+
+
+    //public FisModFrame(Parameters parm, Exit exit)
+
+    public void go(Parameters parm, Exit exit) {
+        //super("Fisica moderna");
+        il=UserInterface.getImageLoader();
+        help=UserInterface.getHelpDisplayer();
+        this.parm=parm;
+        this.exit=exit;
+        //setIconImage(il.load("icons/simul.gif"));
+
+        //createMenuBar();
+
+	    setLayout (new BorderLayout());
+
+
+
+        createPanel();
+
+
+
+	    createToolbar();
+
+
+
+        show();
+
+        
+
+        /*
+
+        Event a=new Event(this,Event.ACTION_EVENT,"");
+
+        String tipo=parm.getString("tipo", "null");
+
+        show("*Blank*");
+
+        if ("bohr".equals(tipo))
+
+            action(a, "Atomo di Bohr");
+
+        else if ("compton".equals(tipo)) 
+
+            action(a, "Effetto Compton...");
+
+        else if ("spettro".equals(tipo)) 
+
+            action(a, "Spettro atomico dell'idrogeno...");
+
+        */
+        //createStatus();
+
+        //resize(512, 440);
+        //centerOnScreen();
+    }
+
+
+    void createToolbar()
+      { Toolbar tb=new Toolbar(Toolbar.VERTICAL);
+
+
+
+        String tipo=parm.getString("tipo", "null");
+
+        show("*Blank*");
+
+        if ("bohr".equals(tipo)) {
+
+            tb.addTool("Atomo di Bohr", il.load("icons/atomo.gif"),
+
+                    "Atomo di Bohr");
+
+            show("Bohr");
+
+        } else if ("compton".equals(tipo)) {
+
+            tb.addTool("Effetto Compton...", il.load("icons/compton.gif"),
+
+                    "Effetto Compton");
+
+            show("Compton");
+
+        } else if ("spettro".equals(tipo)) {
+
+            tb.addTool("Spettro atomico dell'idrogeno...", 
+
+                    il.load("icons/spettro.gif"),
+
+                    "Spettro atomico dell'idrogeno");
+
+            show("Spettro");
+
+        } else {
+            tb.addTool("Atomo di Bohr", il.load("icons/atomo.gif"),
+                    "Atomo di Bohr");
+            tb.addTool("Spettro atomico dell'idrogeno...", 
+                    il.load("icons/spettro.gif"),
+                    "Spettro atomico dell'idrogeno");
+            tb.addTool("Effetto Compton...", il.load("icons/compton.gif"),
+                    "Effetto Compton");
+
+        }
+        /*tb.addTool("Uscita...", il.load("icons/exit.gif"),
+                   "Esci dal programma");*/
+
+        tb.setStatusDisplayer(this);
+        add("West", tb);
+      }
+
+
+    void createPanel()
+      { cardsPanel=new Panel();
+        cards=new CardLayout();
+        cardsPanel.setLayout(cards);
+
+        simulationBohr=new SimulationBohr();
+        cardsPanel.add("Bohr", simulationBohr);
+
+        simulationSpettro=new SimulationSpettro();
+        cardsPanel.add("Spettro", simulationSpettro);
+
+        simulationCompton=new SimulationCompton();
+        cardsPanel.add("Compton", simulationCompton);
+
+        // To be continued
+
+        add("Center", cardsPanel);
+        simulationDisplay=simulationBohr;
+
+        Panel blank=new Panel();
+        blank.setBackground(Color.white);
+        cardsPanel.add("*Blank*", blank);
+        show("*Blank*");
+      }
+
+    public void show(String name)
+      { cards.show(cardsPanel, name);
+        cardsPanel.repaint();
+      }
+
+    public boolean action(Event evt, Object what)
+      { 
+        if ("Uscita...".equals(what))
+          MessageBox.confirm(this, "Fisica moderna", 
+                                   "Vuoi uscire dal programma?",
+                             "*Exit*");
+        else if ("*Exit*".equals(what))
+          { simulationDisplay.stopAnimation();
+            //salva su file C://Simul il numero 1
+            //salva();
+            
+
+            exit.exit(this, null);
+          }
+        else if ("Atomo di Bohr".equals(what))
+          { simulationDisplay.stopAnimation();
+            show("Bohr");
+            simulationDisplay=simulationBohr;
+            simulationDisplay.startAnimation();
+            //toFront();
+          }
+        else if ("Spettro atomico dell'idrogeno...".equals(what))
+          { simulationDisplay.stopAnimation();
+            show("Spettro");
+            simulationDisplay=simulationSpettro;
+            simulationDisplay.startAnimation();
+            //toFront();
+          }
+        else if ("Effetto Compton...".equals(what))
+          { simulationDisplay.stopAnimation();
+            show("Compton");
+            simulationDisplay=simulationCompton;
+            simulationDisplay.startAnimation();
+            //toFront();
+          }
+        else if ("Aiuto".equals(what))
+          help.displayHelp("help/fismod", "fismod");
+        
+        return true;
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.id==Event.WINDOW_DESTROY)
+          MessageBox.confirm(this, "Fisica moderna", 
+                               "Vuoi uscire dal programma?",
+                                       "*Exit*");
+        return super.handleEvent(evt);
+      }
+  }

@@ -1,1 +1,28 @@
-package ui;import ui.ImageLoader;import java.applet.*;import java.awt.*;/** * Implements an image loader for an applet. * The images are loaded from a location relative * to the applet code base. * @author Pasquale Foggia * @version 0.99, Dec 1997 * @see ui.ImageLoader  */public class AppletImageLoader extends ImageLoader  { Applet applet;    public AppletImageLoader(Applet applet)      { this.applet=applet;      }    protected Image fetch(String name)      { applet.showStatus("Loading image "+name+"...");        Image img= applet.getImage(applet.getCodeBase(), name);        applet.showStatus("");        return img;      }  }
+package ui;
+
+import ui.ImageLoader;
+import java.applet.*;
+import java.awt.*;
+
+/**
+ * Implements an image loader for an applet.
+ * The images are loaded from a location relative
+ * to the applet code base.
+ * @author Pasquale Foggia
+ * @version 0.99, Dec 1997
+ * @see ui.ImageLoader 
+ */
+public class AppletImageLoader extends ImageLoader
+  { Applet applet;
+
+    public AppletImageLoader(Applet applet)
+      { this.applet=applet;
+      }
+
+    protected Image fetch(String name)
+      { applet.showStatus("Loading image "+name+"...");
+        Image img= applet.getImage(applet.getCodeBase(), name);
+        applet.showStatus("");
+        return img;
+      }
+  }

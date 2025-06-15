@@ -1,1 +1,9 @@
-package fismod;/** * An object displaying a simulation */public interface SimulationDisplay  { void startAnimation();    void stopAnimation();  }
+package fismod;
+
+/**
+ * An object displaying a simulation
+ */
+public interface SimulationDisplay
+  { void startAnimation();
+    void stopAnimation();
+  }

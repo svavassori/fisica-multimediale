@@ -1,1 +1,98 @@
-package ui;import util.*;import java.awt.*;/** * A numeric input component, made by two text field  *  * This item reports an action event to the caller with itself as * the action object each time that the value changes. * @author S. De Vito * @version 0.99, Feb 1999 */public class ExtNumInput extends Panel  {     TextField field;        double min, max, value;    static final int ESC=27; // Codice ASCII del tasto ESC    public ExtNumInput(double value,double min, double max)      {         this.min=min;        this.max=max;        this.value=value;        //setLayout(null);        field=new TextField(9);                setValue(value, true);        add(field);              }    public double getValue()      { return value;      }    public void setValue(double d)      { setValue(d, true);      }    public double getValue(boolean dummy)      { return value;      }    public void setValue(double v, boolean dummy)      {        value=v;        if (value<min)          value=min;        if (value>max)          value=max;         if (field!=null)          field.setText(Format.format_e("8.3",value));      }    public boolean handleEvent(Event evt)      {          if (evt.target==field)          {             if ((evt.id==Event.KEY_PRESS && evt.key=='\n')                || evt.id==Event.LOST_FOCUS)              {                double v=Double.valueOf(field.getText()).doubleValue();               setValue(v);               //System.out.println(" Value: "+v+" - "+value);               notifyChange();               return true;              }            else if (evt.id==Event.KEY_PRESS && evt.key==ESC)              {               double v=getValue();               setValue(v);               return true;              }          }        return super.handleEvent(evt);      }    void notifyChange()      { deliverEvent(new Event(this, Event.ACTION_EVENT, this));      }      }
+package ui;
+
+import util.*;
+import java.awt.*;
+
+/**
+ * A numeric input component, made by two text field 
+ * 
+ * This item reports an action event to the caller with itself as
+ * the action object each time that the value changes.
+ * @author S. De Vito
+ * @version 0.99, Feb 1999
+ */
+public class ExtNumInput extends Panel
+  { 
+    TextField field;
+    
+
+    double min, max, value;
+
+    static final int ESC=27; // Codice ASCII del tasto ESC
+
+    public ExtNumInput(double value,double min, double max)
+      { 
+        this.min=min;
+        this.max=max;
+
+        this.value=value;
+        //setLayout(null);
+
+
+        field=new TextField(9);
+        
+
+        setValue(value, true);
+
+        add(field);
+        
+
+      }
+
+    public double getValue()
+      { return value;
+      }
+
+    public void setValue(double d)
+      { setValue(d, true);
+      }
+
+    public double getValue(boolean dummy)
+      { return value;
+      }
+
+    public void setValue(double v, boolean dummy)
+      {
+        value=v;
+        if (value<min)
+          value=min;
+        if (value>max)
+          value=max; 
+        if (field!=null)
+          field.setText(Format.format_e("8.3",value));
+      }
+
+
+    public boolean handleEvent(Event evt)
+      {  
+        if (evt.target==field)
+          { 
+            if ((evt.id==Event.KEY_PRESS && evt.key=='\n')
+                || evt.id==Event.LOST_FOCUS)
+              { 
+               double v=Double.valueOf(field.getText()).doubleValue();
+
+               setValue(v);
+               //System.out.println(" Value: "+v+" - "+value);
+               notifyChange();
+               return true;
+              }
+            else if (evt.id==Event.KEY_PRESS && evt.key==ESC)
+              {
+               double v=getValue();
+               setValue(v);
+               return true;
+              }
+          }
+        return super.handleEvent(evt);
+      }
+
+    void notifyChange()
+      { deliverEvent(new Event(this, Event.ACTION_EVENT, this));
+
+      }
+
+    
+
+  }
+

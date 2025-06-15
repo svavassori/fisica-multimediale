@@ -1,1 +1,53 @@
-package ui;import java.awt.*;import java.util.*;/** * Implements an image loader for standalone applications. * The images are loaded from a location relative to the * directory which is current when the object is created */public class ApplicationImageLoader extends ImageLoader  { String basePath=System.getProperty("user.dir");    String fileSep=System.getProperty("file.separator");    public ApplicationImageLoader()      {       }    protected Image fetch(String name)      { // Converts the name to an absolute path name        String name1=gsub(name, "/", fileSep);        String fullName=basePath+fileSep+name1;        return Toolkit.getDefaultToolkit().getImage(fullName);      }    /**     * Substitute all the occurences of oldsub with newsub in str     */    String gsub(String str, String oldsub, String newsub)      { int oldlen=oldsub.length();        int newlen=newsub.length();        if (oldlen==0)          return str;        int idx=0;        while (idx < str.length())          { idx=str.indexOf(oldsub, idx);            if (idx<0)              break;            str=str.substring(0, idx)+newsub+str.substring(idx+oldlen);            idx+=newlen;          }        return str;      }  }
+package ui;
+
+import java.awt.*;
+import java.util.*;
+
+
+/**
+ * Implements an image loader for standalone applications.
+ * The images are loaded from a location relative to the
+ * directory which is current when the object is created
+ */
+public class ApplicationImageLoader extends ImageLoader
+  { String basePath=System.getProperty("user.dir");
+    String fileSep=System.getProperty("file.separator");
+
+    public ApplicationImageLoader()
+      { 
+
+      }
+
+    protected Image fetch(String name)
+      { // Converts the name to an absolute path name
+        String name1=gsub(name, "/", fileSep);
+        String fullName=basePath+fileSep+name1;
+
+        return Toolkit.getDefaultToolkit().getImage(fullName);
+      }
+
+    /**
+     * Substitute all the occurences of oldsub with newsub in str
+     */
+    String gsub(String str, String oldsub, String newsub)
+      { int oldlen=oldsub.length();
+        int newlen=newsub.length();
+
+        if (oldlen==0)
+          return str;
+
+        int idx=0;
+
+        while (idx < str.length())
+          { idx=str.indexOf(oldsub, idx);
+            if (idx<0)
+              break;
+            str=str.substring(0, idx)+newsub+str.substring(idx+oldlen);
+            idx+=newlen;
+          }
+
+        return str;
+
+      }
+
+  }

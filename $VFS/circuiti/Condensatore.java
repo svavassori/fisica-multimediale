@@ -1,1 +1,84 @@
-package circuiti;import util.*;import java.awt.*;/** * Un condensatore */public class Condensatore extends Componente  { double C, Q0;    public Condensatore(double C, double Q0)      { this.C=C;        this.Q0=Q0;      }    public double getC()      { return C;      }    public double getQ0()      { return Q0;      }    public String toString()      { return "Condensatore C="+Format.format_e(".5", C)+" F "+               "Q0="+Format.format_e(".5", Q0)+" C";      }    public void paint(Graphics g, int x1, int y1, int x2, int y2)      { paintOrientation(g, x1, y1, x2, y2);        g.setColor(Color.black);        int dx=x2-x1;        int dy=y2-y1;        if (dx==0)          { g.drawLine(x1, y1, x1, y1+3*dy/7);            g.drawLine(x1-dy/4, y1+3*dy/7, x1+dy/4, y1+3*dy/7);            g.drawLine(x1-dy/4, y1+4*dy/7, x1+dy/4, y1+4*dy/7);            g.drawLine(x2, y2, x1, y1+4*dy/7);          }        else          { g.drawLine(x1, y1, x1+3*dx/7, y1);            g.drawLine(x1+3*dx/7, y2-dx/4, x1+3*dx/7, y1+dx/4);            g.drawLine(x1+4*dx/7, y2-dx/4, x1+4*dx/7, y1+dx/4);            g.drawLine(x2, y2, x1+4*dx/7, y1);          }      }    public int getInfoCount()      { return super.getInfoCount()+2;      }    public String getInfoName(int type)      { int sup=super.getInfoCount();        String names[]={"Carica", "Energia"};        if (type<sup)          return super.getInfoName(type);        else          return names[type-sup];      }    public String getInfoShortName(int type)      { int sup=super.getInfoCount();        String names[]={"Q[C]", "E[J]"};        if (type<sup)          return super.getInfoShortName(type);        else          return names[type-sup];      }    public double getInfo(int type, double V, double I)      { int sup=super.getInfoCount();        if (type<sup)          return super.getInfo(type, V, I);        switch(type-sup)          { case 0:              return C*V;            case 1:              return 0.5*C*V*V;            default:              throw new IllegalArgumentException();          }      }  }
+package circuiti;
+
+import util.*;
+import java.awt.*;
+
+/**
+ * Un condensatore
+ */
+public class Condensatore extends Componente
+  { double C, Q0;
+
+    public Condensatore(double C, double Q0)
+      { this.C=C;
+        this.Q0=Q0;
+      }
+
+    public double getC()
+      { return C;
+      }
+
+    public double getQ0()
+      { return Q0;
+      }
+
+    public String toString()
+      { return "Condensatore C="+Format.format_e(".5", C)+" F "+
+               "Q0="+Format.format_e(".5", Q0)+" C";
+      }
+
+    public void paint(Graphics g, int x1, int y1, int x2, int y2)
+      { paintOrientation(g, x1, y1, x2, y2);
+        g.setColor(Color.black);
+        int dx=x2-x1;
+        int dy=y2-y1;
+        if (dx==0)
+          { g.drawLine(x1, y1, x1, y1+3*dy/7);
+            g.drawLine(x1-dy/4, y1+3*dy/7, x1+dy/4, y1+3*dy/7);
+            g.drawLine(x1-dy/4, y1+4*dy/7, x1+dy/4, y1+4*dy/7);
+            g.drawLine(x2, y2, x1, y1+4*dy/7);
+          }
+        else
+          { g.drawLine(x1, y1, x1+3*dx/7, y1);
+            g.drawLine(x1+3*dx/7, y2-dx/4, x1+3*dx/7, y1+dx/4);
+            g.drawLine(x1+4*dx/7, y2-dx/4, x1+4*dx/7, y1+dx/4);
+            g.drawLine(x2, y2, x1+4*dx/7, y1);
+          }
+      }
+
+    public int getInfoCount()
+      { return super.getInfoCount()+2;
+      }
+
+    public String getInfoName(int type)
+      { int sup=super.getInfoCount();
+        String names[]={"Carica", "Energia"};
+        if (type<sup)
+          return super.getInfoName(type);
+        else
+          return names[type-sup];
+      }
+
+    public String getInfoShortName(int type)
+      { int sup=super.getInfoCount();
+        String names[]={"Q[C]", "E[J]"};
+        if (type<sup)
+          return super.getInfoShortName(type);
+        else
+          return names[type-sup];
+      }
+
+    public double getInfo(int type, double V, double I)
+      { int sup=super.getInfoCount();
+        if (type<sup)
+          return super.getInfo(type, V, I);
+        switch(type-sup)
+          { case 0:
+              return C*V;
+            case 1:
+              return 0.5*C*V*V;
+            default:
+              throw new IllegalArgumentException();
+          }
+      }
+  }

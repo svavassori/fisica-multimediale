@@ -1,1 +1,75 @@
-package ui;import java.awt.*;/** * A simple textual help displayer. */public class TextHelpDisplayer implements HelpDisplayer, Exit  { String basePath=System.getProperty("user.dir");    String fileSep=System.getProperty("file.separator");    Window frame=null;    public TextHelpDisplayer()      {      }    /**     * Shows an help page for a given topic/item pair     * The topic is the name of a file under the      * help subdirectory of the directory which is current     * when the object is created.     * The item is a tag which marks the part of the file which     * must be displayed. The tag is      */    public void displayHelp(String topic, String item)      { if (frame!=null)          { frame.dispose();            frame=null;          }        // Converts the name to an absolute path name        String name1=gsub(topic, "/", fileSep);        String fullName=basePath+fileSep+name1+".txt";                frame=new TextHelpFrame(this, fullName,item);        frame.reshape(30, 30, 500, 300);        frame.show();      }    /**     * See ui.Exit     */    public void exit(Object obj, Object arg)      { if (frame!=null && obj==frame)          { frame.dispose();            frame=null;          }      }    /**     * Substitute all the occurences of oldsub with newsub in str     */    String gsub(String str, String oldsub, String newsub)      { int oldlen=oldsub.length();        int newlen=newsub.length();        if (oldlen==0)          return str;        int idx=0;        while (idx < str.length())          { idx=str.indexOf(oldsub, idx);            if (idx<0)              break;            str=str.substring(0, idx)+newsub+str.substring(idx+oldlen);            idx+=newlen;          }        return str;      }  }
+package ui;
+
+import java.awt.*;
+
+/**
+ * A simple textual help displayer.
+ */
+public class TextHelpDisplayer implements HelpDisplayer, Exit
+  { String basePath=System.getProperty("user.dir");
+    String fileSep=System.getProperty("file.separator");
+    Window frame=null;
+
+    public TextHelpDisplayer()
+      {
+      }
+
+    /**
+     * Shows an help page for a given topic/item pair
+     * The topic is the name of a file under the 
+     * help subdirectory of the directory which is current
+     * when the object is created.
+     * The item is a tag which marks the part of the file which
+     * must be displayed. The tag is 
+     */
+    public void displayHelp(String topic, String item)
+      { if (frame!=null)
+          { frame.dispose();
+            frame=null;
+          }
+
+        // Converts the name to an absolute path name
+        String name1=gsub(topic, "/", fileSep);
+        String fullName=basePath+fileSep+name1+".txt";
+        
+        frame=new TextHelpFrame(this, fullName,item);
+        frame.reshape(30, 30, 500, 300);
+        frame.show();
+      }
+
+    /**
+     * See ui.Exit
+     */
+    public void exit(Object obj, Object arg)
+      { if (frame!=null && obj==frame)
+          { frame.dispose();
+            frame=null;
+          }
+      }
+
+
+    /**
+     * Substitute all the occurences of oldsub with newsub in str
+     */
+    String gsub(String str, String oldsub, String newsub)
+      { int oldlen=oldsub.length();
+        int newlen=newsub.length();
+
+        if (oldlen==0)
+          return str;
+
+        int idx=0;
+
+        while (idx < str.length())
+          { idx=str.indexOf(oldsub, idx);
+            if (idx<0)
+              break;
+            str=str.substring(0, idx)+newsub+str.substring(idx+oldlen);
+            idx+=newlen;
+          }
+
+        return str;
+
+      }
+
+  }

@@ -1,1 +1,24 @@
-package dinam1;/** * This class contains the settings for the experiment */public class Settings  {     // Tipi di vincolo    public static final int NESSUNO=0;    public static final int PIANO=1;    public static final int CIRCONFERENZA=2;    public static final int TIPI_DI_VINCOLO=3;    public int vincolo;      public double fx=0, fy=-5; // Componenti del campo di forza    public double attrito_coulombiano=0.0;    public double resistenza_laminare=0.0;    public double resistenza_turbolenta=0.0;    int angolo=0; // angolo del piano    double raggio=1.0; // raggio della circonferenza;  }
+package dinam1;
+
+/**
+ * This class contains the settings for the experiment
+ */
+public class Settings
+  { 
+    // Tipi di vincolo
+    public static final int NESSUNO=0;
+    public static final int PIANO=1;
+    public static final int CIRCONFERENZA=2;
+    public static final int TIPI_DI_VINCOLO=3;
+
+    public int vincolo;
+  
+    public double fx=0, fy=-5; // Componenti del campo di forza
+
+    public double attrito_coulombiano=0.0;
+    public double resistenza_laminare=0.0;
+    public double resistenza_turbolenta=0.0;
+
+    int angolo=0; // angolo del piano
+    double raggio=1.0; // raggio della circonferenza;
+  }

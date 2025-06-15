@@ -1,1 +1,328 @@
-package cinemat;import java.io.*;import ui.*;import java.awt.*;import util.Preloader;public class CinematFrame extends TrackedFrame implements StatusDisplayer {    ImageLoader il;    HelpDisplayer help;    Parameters parm;    Panel cardsPanel;    CardLayout cards;    Settings settings;    Options options;    Simulation simulation;    SimulationInfoDisplay simulationInfoDisplay;    SimulationDisplay simulationDisplay;    SimulationTable simulationTable;    SimulationGraphic simulationGraphic;    SimulationMultiGraphic simulationMultiGraphic;    Label info_text;    Exit exit;    public CinematFrame() {        super("Cinematica");    }    public void go( Parameters parm, Exit exit) {        go1( parm, exit );    }    //public CinematFrame(Parameters parm, Exit exit)    public void go1(Parameters parm, Exit exit) {        // super("Cinematica - simulazione");        il=UserInterface.getImageLoader();        help=UserInterface.getHelpDisplayer();        this.parm=parm;        this.exit=exit;        settings=new Settings(parm);        if (settings.ForcedSimulation==1)        {setTitle("Cinematica - Moto Rettilineo Uniforme");}        else if (settings.ForcedSimulation==2){setTitle("Cinematica - Moto Rettilineo Uniformemente Accelerato");}        else if (settings.ForcedSimulation==3){setTitle("Cinematica - Moto Circolare");}        else if (settings.ForcedSimulation==4){setTitle("Cinematica - Moto Armonico");}        options=new Options();        simulation=null;                setIconImage(il.load("icons/simul.gif"));        if (!WindowsTracker.isEnabled())            createMenuBar();        createToolbar();        createPanel();        createStatus();        resize(512, 384);        centerOnScreen();    }    void createMenuBar() {        Font font=new Font("Helvetica", Font.PLAIN, 12);        MenuBar mb=new MenuBar();        Menu m=new Menu("Esperimento");        m.add("Imposta parametri...");        m.add("Esegui");        m.addSeparator();        m.add("Opzioni simulazione...");        m.addSeparator();        m.add("Uscita...");        m.setFont(font);        mb.add(m);        m=new Menu("Visualizza");        m.add("Simulazione");        m.add("Grafico...");        m.add("Tabella");        m.setFont(font);        mb.add(m);        m=new Menu("Aiuto");        m.add("Aiuto");        mb.add(m);        mb.setFont(font);        //setMenuBar(mb);      }    void createToolbar() {        Toolbar tb=new Toolbar(Toolbar.VERTICAL);        tb.addTool("Imposta parametri...", il.load("icons/settings.gif"),                   "Imposta parametri");        tb.addTool("Esegui", il.load("icons/go.gif"),                   "Esegui simulazione");        tb.addTool("Simulazione", il.load("icons/simul.gif"),                   "Visualizza simulazione");        if (settings.ForcedSimulation!=3)        {        tb.addTool("Grafico...", il.load("icons/grafico.gif"),                   "Visualizza grafico");        tb.addTool("Grafico Multiplo...", il.load("icons/graficom.gif"),                   "Visualizza grafico multiplo");        }        tb.addTool("Tabella", il.load("icons/tabella.gif"),                   "Visualizza tabella");        tb.addTool("Uscita...", il.load("icons/exit.gif"),                   "Esci dal programma");        tb.setStatusDisplayer(this);        add("West", tb);    }    void createPanel() {        cardsPanel=new Panel();        cards=new CardLayout();        cardsPanel.setLayout(cards);        Panel simulationPanel=new Panel();        simulationPanel.setLayout(new BorderLayout());        simulationInfoDisplay=new SimulationInfoDisplay();        simulationPanel.add("North", simulationInfoDisplay);        simulationDisplay=new SimulationDisplay(this, options, settings,                                                simulationInfoDisplay);        createSimulation();        simulationInfoDisplay.set(simulation);        simulationDisplay.play(simulation);        simulationPanel.add("Center", simulationDisplay);        cardsPanel.add("Simulazione", simulationPanel);        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));                simulationGraphic=new SimulationGraphic();        simulationGraphic.setStatusDisplayer(this);        cardsPanel.add("Grafico", simulationGraphic);        simulationMultiGraphic=new SimulationMultiGraphic();        cardsPanel.add("Grafico Multiplo", simulationMultiGraphic);                simulationMultiGraphic.setNumberOfDisplay(3);        simulationMultiGraphic.setStatusDisplayer(this);                                    simulationTable=new SimulationTable();        cardsPanel.add("Tabella", simulationTable);                add("Center", cardsPanel);    }    public void createStatus() {        Font font=new Font("Helvetica", Font.PLAIN, 12);        info_text=new Label("");        info_text.setBackground(Color.lightGray);        info_text.setAlignment(Label.CENTER);        info_text.setFont(font);        add("South", info_text);    }        public void show(String name) {        cards.show(cardsPanel, name);        cardsPanel.repaint();    }    public void showStatus(String status) {        info_text.setText(status);    }    synchronized public boolean action(Event evt, Object what) {       // System.out.println(evt);        if ("Uscita...".equals(what))            show("ExitPanel");          /*ExitBox.confirm(this, "Cinematica", "Vuoi uscire dal programma?",                             "*Exit*");*/        else if ("*Exit*".equals(what)) {            //hide();            if (simulationDisplay!=null)              simulationDisplay.stopAnimation();            //salva su file C://Simul il numero 1            show("Simulazione");            salva();            exit.exit(this, null);        }        else if ("*CancelExit*".equals(what)) {            show("Simulazione");        }        else if ("Imposta parametri...".equals(what)) {            Dialog dialog=new SettingsDialog(this, settings);            dialog.reshape(50, 50, 500, 360);            dialog.show(true);            dialog.move(50, 50);            //toFront();        }        else if ("Esegui".equals(what)) {            show("Simulazione");            simulationDisplay.stopAnimation();            simulationDisplay.startAnimation();        }        else if ("Opzioni simulazione...".equals(what)) {            Dialog dialog=new OptionsDialog(this, options);            dialog.reshape(50, 50, 450, 340);            dialog.show(true);            dialog.move(50, 50);        }        else if ("Simulazione".equals(what))          show("Simulazione");        else if ("Grafico...".equals(what)) {            if (simulation==null || simulation.getStepCount()==0)              MessageBox.message(this,"Cinematica - Grafico",                     "Devi eseguire la simulazione prima\n"+                     "di poter visualizzare il grafico");            else {                Dialog dialog=new GraphicDialog(this, simulation);                dialog.reshape(50, 50, 550, 400);                dialog.show(true);                dialog.move(50, 50);                //toFront();            }        }        else if ("Grafico Multiplo...".equals(what)) {            if (simulation==null || simulation.getStepCount()==0)              MessageBox.message(this,"Cinematica - Grafico Multiplo",                     "Devi eseguire la simulazione prima\n"+                     "di poter visualizzare il grafico");            else {                show("Simulazione");                Dialog dialog=new MultiGraphicDialog(this, simulation);                dialog.reshape(50, 50, 550, 400);                dialog.show(true);                dialog.move(50, 50);                            }        }        else if ("Tabella".equals(what)) {            if (simulation!=null && simulation.getStepCount()>0)                simulationTable.update(simulation);            show("Tabella");        }        else if ("Aiuto".equals(what))            help.displayHelp("help/cinemat", "cinemat");        else if (what!=null && what instanceof Settings) {            settings=(Settings)what;            simulationDisplay.reset(settings);            createSimulation();            simulationInfoDisplay.set(simulation);            simulationDisplay.play(simulation);        }        else if (what!=null && what instanceof Options) {            options=(Options)what;            simulationDisplay.setOptions(options);        }        else if (what!=null && what instanceof GraphicDialog) {            GraphicDialog gd=(GraphicDialog)what;            simulationGraphic.setData(simulation,                 gd.getXChoice(), gd.getYChoice());            show("Grafico");        }        else if (what!=null && what instanceof MultiGraphicDialog) {            MultiGraphicDialog gd=(MultiGraphicDialog)what;            int s,lim;            lim=gd.getNum_of_Functions();          //  System.out.println("Numero di grafici:"+lim);            simulationMultiGraphic.setNumberOfDisplay(lim);            for(s=0;s<lim;s++)            {           // System.out.println("Sav: "+"s:"+s +" "+gd.getXChoice()+" "+gd.getYChoice(s+1));            simulationMultiGraphic.setData(s,simulation,gd.getXChoice(),gd.getYChoice(s+1));            }            simulationMultiGraphic.autoResizeItems();            show("Grafico Multiplo");            }        return true;    }    public boolean handleEvent(Event evt) {        if (evt.id==Event.WINDOW_DESTROY)            show("ExitPanel");        return super.handleEvent(evt);    }    public void createSimulation() {        int base=settings.moto_base;        int rel=settings.moto_relativo;        if (base==Settings.TRASLATORIO &&            (rel==Settings.NESSUNO || rel==Settings.TRASLATORIO))          { simulation=new SimulationTransl(settings);          }         else if (base==Settings.TRASLATORIO &&                 rel==Settings.ROTATORIO)          { simulation=new SimulationTranslRot(settings);          }         else if (base==Settings.ROTATORIO &&                 rel==Settings.TRASLATORIO)          { simulation=new SimulationRotTransl(settings);          }         else if (base==Settings.ROTATORIO &&            (rel==Settings.NESSUNO || rel==Settings.ROTATORIO))          { simulation=new SimulationRot(settings);          }         else          MessageBox.alert(this,"Cinematica - Esegui",                           "Tipo di moto non implementato");    }        public void salva() {        try {            Writer out = new FileWriter(Preloader.getSimulFileName());            out.write("1");            out.flush();             out.close();        }           catch(Exception e) {            System.out.println("File non trovato");        }    } }
+
+
+package cinemat;
+
+import java.io.*;
+import ui.*;
+import java.awt.*;
+import util.Preloader;
+
+public class CinematFrame extends TrackedFrame implements StatusDisplayer {
+    ImageLoader il;
+    HelpDisplayer help;
+    Parameters parm;
+    Panel cardsPanel;
+    CardLayout cards;
+    Settings settings;
+    Options options;
+    Simulation simulation;
+    SimulationInfoDisplay simulationInfoDisplay;
+    SimulationDisplay simulationDisplay;
+    SimulationTable simulationTable;
+    SimulationGraphic simulationGraphic;
+    SimulationMultiGraphic simulationMultiGraphic;
+    Label info_text;
+    Exit exit;
+
+    public CinematFrame() {
+        super("Cinematica");
+    }
+
+    public void go( Parameters parm, Exit exit) {
+        go1( parm, exit );
+    }
+
+    //public CinematFrame(Parameters parm, Exit exit)
+    public void go1(Parameters parm, Exit exit) {
+        // super("Cinematica - simulazione");
+        il=UserInterface.getImageLoader();
+        help=UserInterface.getHelpDisplayer();
+        this.parm=parm;
+        this.exit=exit;
+        settings=new Settings(parm);
+
+        if (settings.ForcedSimulation==1)
+        {setTitle("Cinematica - Moto Rettilineo Uniforme");}
+        else if (settings.ForcedSimulation==2){setTitle("Cinematica - Moto Rettilineo Uniformemente Accelerato");}
+        else if (settings.ForcedSimulation==3){setTitle("Cinematica - Moto Circolare");}
+        else if (settings.ForcedSimulation==4){setTitle("Cinematica - Moto Armonico");}
+        options=new Options();
+        simulation=null;
+        
+        setIconImage(il.load("icons/simul.gif"));
+
+        if (!WindowsTracker.isEnabled())
+            createMenuBar();
+
+        createToolbar();
+        createPanel();
+        createStatus();
+
+        resize(512, 384);
+        centerOnScreen();
+    }
+
+
+    void createMenuBar() {
+        Font font=new Font("Helvetica", Font.PLAIN, 12);
+
+        MenuBar mb=new MenuBar();
+        Menu m=new Menu("Esperimento");
+
+        m.add("Imposta parametri...");
+        m.add("Esegui");
+        m.addSeparator();
+        m.add("Opzioni simulazione...");
+        m.addSeparator();
+        m.add("Uscita...");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Visualizza");
+        m.add("Simulazione");
+        m.add("Grafico...");
+        m.add("Tabella");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Aiuto");
+        m.add("Aiuto");
+        mb.add(m);
+
+        mb.setFont(font);
+        //setMenuBar(mb);
+      }
+
+    void createToolbar() {
+        Toolbar tb=new Toolbar(Toolbar.VERTICAL);
+
+        tb.addTool("Imposta parametri...", il.load("icons/settings.gif"),
+                   "Imposta parametri");
+        tb.addTool("Esegui", il.load("icons/go.gif"),
+                   "Esegui simulazione");
+        tb.addTool("Simulazione", il.load("icons/simul.gif"),
+                   "Visualizza simulazione");
+
+        if (settings.ForcedSimulation!=3)
+        {
+        tb.addTool("Grafico...", il.load("icons/grafico.gif"),
+                   "Visualizza grafico");
+        tb.addTool("Grafico Multiplo...", il.load("icons/graficom.gif"),
+                   "Visualizza grafico multiplo");
+        }
+
+        tb.addTool("Tabella", il.load("icons/tabella.gif"),
+                   "Visualizza tabella");
+        tb.addTool("Uscita...", il.load("icons/exit.gif"),
+                   "Esci dal programma");
+
+        tb.setStatusDisplayer(this);
+        add("West", tb);
+    }
+
+    void createPanel() {
+        cardsPanel=new Panel();
+        cards=new CardLayout();
+        cardsPanel.setLayout(cards);
+
+        Panel simulationPanel=new Panel();
+        simulationPanel.setLayout(new BorderLayout());
+        simulationInfoDisplay=new SimulationInfoDisplay();
+        simulationPanel.add("North", simulationInfoDisplay);
+
+        simulationDisplay=new SimulationDisplay(this, options, settings,
+                                                simulationInfoDisplay);
+        createSimulation();
+        simulationInfoDisplay.set(simulation);
+        simulationDisplay.play(simulation);
+
+        simulationPanel.add("Center", simulationDisplay);
+
+        cardsPanel.add("Simulazione", simulationPanel);
+
+        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));
+        
+        simulationGraphic=new SimulationGraphic();
+        simulationGraphic.setStatusDisplayer(this);
+        cardsPanel.add("Grafico", simulationGraphic);
+        simulationMultiGraphic=new SimulationMultiGraphic();
+        cardsPanel.add("Grafico Multiplo", simulationMultiGraphic);        
+        simulationMultiGraphic.setNumberOfDisplay(3);
+        simulationMultiGraphic.setStatusDisplayer(this);                            
+        simulationTable=new SimulationTable();
+        cardsPanel.add("Tabella", simulationTable);
+        
+        add("Center", cardsPanel);
+    }
+
+    public void createStatus() {
+        Font font=new Font("Helvetica", Font.PLAIN, 12);
+        info_text=new Label("");
+        info_text.setBackground(Color.lightGray);
+        info_text.setAlignment(Label.CENTER);
+        info_text.setFont(font);
+        add("South", info_text);
+    }
+
+    
+    public void show(String name) {
+        cards.show(cardsPanel, name);
+        cardsPanel.repaint();
+    }
+
+    public void showStatus(String status) {
+        info_text.setText(status);
+    }
+
+    synchronized public boolean action(Event evt, Object what) {
+       // System.out.println(evt);
+
+        if ("Uscita...".equals(what))
+            show("ExitPanel");
+          /*ExitBox.confirm(this, "Cinematica", "Vuoi uscire dal programma?",
+                             "*Exit*");*/
+        else if ("*Exit*".equals(what)) {
+            //hide();
+            if (simulationDisplay!=null)
+              simulationDisplay.stopAnimation();
+            //salva su file C://Simul il numero 1
+            show("Simulazione");
+            salva();
+            exit.exit(this, null);
+        }
+        else if ("*CancelExit*".equals(what)) {
+            show("Simulazione");
+        }
+        else if ("Imposta parametri...".equals(what)) {
+            Dialog dialog=new SettingsDialog(this, settings);
+            dialog.reshape(50, 50, 500, 360);
+            dialog.show(true);
+            dialog.move(50, 50);
+            //toFront();
+        }
+        else if ("Esegui".equals(what)) {
+            show("Simulazione");
+            simulationDisplay.stopAnimation();
+            simulationDisplay.startAnimation();
+        }
+        else if ("Opzioni simulazione...".equals(what)) {
+            Dialog dialog=new OptionsDialog(this, options);
+            dialog.reshape(50, 50, 450, 340);
+            dialog.show(true);
+            dialog.move(50, 50);
+        }
+        else if ("Simulazione".equals(what))
+          show("Simulazione");
+        else if ("Grafico...".equals(what)) {
+            if (simulation==null || simulation.getStepCount()==0)
+              MessageBox.message(this,"Cinematica - Grafico",
+                     "Devi eseguire la simulazione prima\n"+
+                     "di poter visualizzare il grafico");
+            else {
+                Dialog dialog=new GraphicDialog(this, simulation);
+                dialog.reshape(50, 50, 550, 400);
+                dialog.show(true);
+                dialog.move(50, 50);
+                //toFront();
+            }
+        }
+        else if ("Grafico Multiplo...".equals(what)) {
+            if (simulation==null || simulation.getStepCount()==0)
+              MessageBox.message(this,"Cinematica - Grafico Multiplo",
+                     "Devi eseguire la simulazione prima\n"+
+                     "di poter visualizzare il grafico");
+            else {
+                show("Simulazione");
+                Dialog dialog=new MultiGraphicDialog(this, simulation);
+                dialog.reshape(50, 50, 550, 400);
+                dialog.show(true);
+                dialog.move(50, 50);                
+            }
+        }
+        else if ("Tabella".equals(what)) {
+            if (simulation!=null && simulation.getStepCount()>0) 
+               simulationTable.update(simulation);
+            show("Tabella");
+        }
+        else if ("Aiuto".equals(what))
+            help.displayHelp("help/cinemat", "cinemat");
+
+        else if (what!=null && what instanceof Settings) {
+            settings=(Settings)what;
+            simulationDisplay.reset(settings);
+            createSimulation();
+            simulationInfoDisplay.set(simulation);
+            simulationDisplay.play(simulation);
+        }
+        else if (what!=null && what instanceof Options) {
+            options=(Options)what;
+            simulationDisplay.setOptions(options);
+        }
+        else if (what!=null && what instanceof GraphicDialog) {
+            GraphicDialog gd=(GraphicDialog)what;
+            simulationGraphic.setData(simulation, 
+                gd.getXChoice(), gd.getYChoice());
+            show("Grafico");
+        }
+        else if (what!=null && what instanceof MultiGraphicDialog) {
+            MultiGraphicDialog gd=(MultiGraphicDialog)what;
+            int s,lim;
+
+            lim=gd.getNum_of_Functions();
+          //  System.out.println("Numero di grafici:"+lim);
+            simulationMultiGraphic.setNumberOfDisplay(lim);
+            for(s=0;s<lim;s++)
+            {
+           // System.out.println("Sav: "+"s:"+s +" "+gd.getXChoice()+" "+gd.getYChoice(s+1));
+
+            simulationMultiGraphic.setData(s,simulation,gd.getXChoice(),gd.getYChoice(s+1));
+            }
+            simulationMultiGraphic.autoResizeItems();
+
+            show("Grafico Multiplo");
+            }
+        return true;
+    }
+
+    public boolean handleEvent(Event evt) {
+        if (evt.id==Event.WINDOW_DESTROY)            show("ExitPanel");
+        return super.handleEvent(evt);
+    }
+
+    public void createSimulation() {
+        int base=settings.moto_base;
+        int rel=settings.moto_relativo;
+
+        if (base==Settings.TRASLATORIO &&
+            (rel==Settings.NESSUNO || rel==Settings.TRASLATORIO))
+          { simulation=new SimulationTransl(settings);
+          } 
+        else if (base==Settings.TRASLATORIO &&
+                 rel==Settings.ROTATORIO)
+          { simulation=new SimulationTranslRot(settings);
+          } 
+        else if (base==Settings.ROTATORIO &&
+                 rel==Settings.TRASLATORIO)
+          { simulation=new SimulationRotTransl(settings);
+          } 
+        else if (base==Settings.ROTATORIO &&
+            (rel==Settings.NESSUNO || rel==Settings.ROTATORIO))
+          { simulation=new SimulationRot(settings);
+          } 
+        else
+          MessageBox.alert(this,"Cinematica - Esegui",
+                           "Tipo di moto non implementato");
+    }
+    
+    public void salva() {
+        try {
+            Writer out = new FileWriter(Preloader.getSimulFileName());
+            out.write("1");
+            out.flush(); 
+            out.close();
+        }   
+        catch(Exception e) {
+            System.out.println("File non trovato");
+        }
+    } 
+}

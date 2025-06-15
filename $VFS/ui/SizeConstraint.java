@@ -1,1 +1,69 @@
-package ui;import java.awt.*;/** * This class implements a panel with only one component. * It is used to force the minimum and the preferred size of * the component * @author Pasquale Foggia * @version 0.99, Dec 1997 */public class SizeConstraint extends Panel  { private Dimension minimum, preferred;    private Component comp;    private boolean aspect=false;    private double aspect_x=1.0, aspect_y=1.0;    public SizeConstraint(Component comp, Dimension dim)      { this(comp, dim, dim);      }    public SizeConstraint(Component comp, Dimension minimum,                           Dimension preferred)      { this.comp=comp;        this.minimum=minimum;        this.preferred=preferred;        setLayout(null);        add(comp);      }    public void setAspect(double x, double y)      { aspect=true;        aspect_x=x;        aspect_y=y;      }    public Dimension minimumSize()      { return new Dimension(minimum.width, minimum.height);      }    public Dimension preferredSize()      { return new Dimension(preferred.width, preferred.height);      }    public Component getComponent()      { return comp;      }    public synchronized void layout()      { Dimension d=size();        if (!aspect)          { comp.reshape(0, 0, d.width, d.height);          }        else if (d.width*aspect_y < d.height*aspect_x)          { int h=(int)(d.width*aspect_y/aspect_x+0.4999);            comp.reshape(0, (d.height-h)/2, d.width, h);          }        else          { int w=(int)(d.height*aspect_x/aspect_y+0.4999);            comp.reshape((d.width-w)/2, 0, w, d.height);          }      }  }
+package ui;
+
+
+import java.awt.*;
+
+
+
+/**
+ * This class implements a panel with only one component.
+ * It is used to force the minimum and the preferred size of
+ * the component
+ * @author Pasquale Foggia
+ * @version 0.99, Dec 1997
+ */
+public class SizeConstraint extends Panel
+  { private Dimension minimum, preferred;
+    private Component comp;
+    private boolean aspect=false;
+    private double aspect_x=1.0, aspect_y=1.0;
+
+    public SizeConstraint(Component comp, Dimension dim)
+      { this(comp, dim, dim);
+      }
+
+    public SizeConstraint(Component comp, Dimension minimum, 
+                          Dimension preferred)
+      { this.comp=comp;
+        this.minimum=minimum;
+        this.preferred=preferred;
+        setLayout(null);
+        add(comp);
+      }
+
+    public void setAspect(double x, double y)
+      { aspect=true;
+        aspect_x=x;
+        aspect_y=y;
+      }
+
+
+    public Dimension minimumSize()
+      { return new Dimension(minimum.width, minimum.height);
+      }
+
+
+    public Dimension preferredSize()
+      { return new Dimension(preferred.width, preferred.height);
+      }
+
+    public Component getComponent()
+      { return comp;
+      }
+
+    public synchronized void layout()
+      { Dimension d=size();
+        if (!aspect)
+          { comp.reshape(0, 0, d.width, d.height);
+          }
+        else if (d.width*aspect_y < d.height*aspect_x)
+          { int h=(int)(d.width*aspect_y/aspect_x+0.4999);
+            comp.reshape(0, (d.height-h)/2, d.width, h);
+          }
+        else
+          { int w=(int)(d.height*aspect_x/aspect_y+0.4999);
+            comp.reshape((d.width-w)/2, 0, w, d.height);
+          }
+      }
+  }
+

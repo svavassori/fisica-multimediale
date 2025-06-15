@@ -1,1 +1,5 @@
-javac CinematFrame.javacd ..java cinemat.Cinemat
+javac CinematFrame.java
+
+cd ..
+
+java cinemat.Cinemat

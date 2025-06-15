@@ -1,1 +1,307 @@
-package circuiti;import java.io.*;import ui.*;import util.Preloader;import java.awt.*;public class CircuitiFrame extends TrackedFrame implements StatusDisplayer  { ImageLoader il;    HelpDisplayer help;    Parameters parm;    Label info_text;    Exit exit;    CardLayout cards;    Panel       cardsPanel;    Circuito circuito;    CircuitoDisplay circuitoDisplay;    GraficoDisplay  graficoDisplay;    SimulationTable  simulationTable;        public CircuitiFrame() {        super("Circuiti elettrici");    }    public void go(Parameters parm, Exit exit)      {         il=UserInterface.getImageLoader();        help=UserInterface.getHelpDisplayer();        this.parm=parm;        this.exit=exit;        setIconImage(il.load("icons/circuito.gif"));        circuito=new Circuito();        if (!WindowsTracker.isEnabled())            createMenuBar();        createToolbar();        createPanel();        createStatus();        resize(512, 384);        centerOnScreen();      }    void createMenuBar()      { Font font=new Font("Helvetica", Font.PLAIN, 12);        MenuBar mb=new MenuBar();        Menu m=new Menu("Esperimento");        m.add("Aggiungi resistore...");        m.add("Aggiungi induttore...");        m.add("Aggiungi condensatore...");        m.add("Aggiungi generatore f.e.m. ...");        m.add("Aggiungi corto circuito");        m.addSeparator();        m.add("Cancella componente");        m.add("Cancella esperimento...");        m.addSeparator();        m.add("Esegui simulazione...");        m.addSeparator();        m.add("Uscita...");        m.setFont(font);        mb.add(m);        m=new Menu("Visualizza");        m.add("Circuito");        m.add("Grafico");        m.add("Tabella");        m.setFont(font);        mb.add(m);        m=new Menu("Aiuto");        m.add("Aiuto");        mb.add(m);        mb.setFont(font);        //setMenuBar(mb);      }    void createToolbar() {        Panel panel=new Panel();        panel.setLayout(new BorderLayout(1,1));        Toolbar tb=new Toolbar(Toolbar.VERTICAL);        tb.addTool("Esegui simulazione...", il.load("icons/go.gif"),                   "Esegui simulazione");        tb.addTool("Circuito", il.load("icons/circuito.gif"),                   "Visualizza circuito");        tb.addTool("Tabella", il.load("icons/tabella.gif"),                   "Visualizza tabella");        tb.addTool("Grafico", il.load("icons/grafico.gif"),                   "Visualizza grafico");        tb.addTool("Uscita...", il.load("icons/exit.gif"),                   "Esci dal programma");        tb.setStatusDisplayer(this);        panel.add("West", tb);        Toolbar tb2=new Toolbar(Toolbar.VERTICAL);        tb2.addTool("Aggiungi resistore...", il.load("icons/resist.gif"),                   "Aggiungi resistore");        tb2.addTool("Aggiungi induttore...", il.load("icons/indutt.gif"),                   "Aggiungi induttore");        tb2.addTool("Aggiungi condensatore...", il.load("icons/condens.gif"),                   "Aggiungi condensatore");        tb2.addTool("Aggiungi generatore f.e.m. ...",                     il.load("icons/gener.gif"),                   "Aggiungi generatore f.e.m.");        tb2.addTool("Aggiungi corto circuito", il.load("icons/corto.gif"),                   "Aggiungi corto circuito");        tb2.addTool("Cancella componente", il.load("icons/gomma.gif"),                   "Cancella componente");                tb2.setStatusDisplayer(this);        panel.add("East", tb2);        Panel dummy=new Panel();        panel.add("South", new SizeConstraint(dummy, new Dimension(1,1)));        add("West", panel);    }    void createPanel(){        cardsPanel=new Panel();        cards=new CardLayout();        cardsPanel.setLayout(cards);        circuitoDisplay=new CircuitoDisplay(circuito, this);        cardsPanel.add("Circuito", circuitoDisplay);        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));                graficoDisplay=new GraficoDisplay();        graficoDisplay.setStatusDisplayer(this);        cardsPanel.add("Grafico", graficoDisplay);        simulationTable=new SimulationTable();        cardsPanel.add("Tabella", simulationTable);        add("Center", cardsPanel);    }    public void createStatus()      { Font font=new Font("Helvetica", Font.PLAIN, 12);        info_text=new Label("");        info_text.setBackground(Color.lightGray);        info_text.setAlignment(Label.CENTER);        info_text.setFont(font);        add("South", info_text);      }        public void show(String name)      { cards.show(cardsPanel, name);        cardsPanel.repaint();      }    public void showStatus(String status)      { info_text.setText(status);      }/*    public void centerOnScreen()      { Dimension s=getToolkit().getScreenSize();        Dimension d=size();        move( (s.width-d.width)/2, (s.height-d.height)/2 );      }*/    public boolean action(Event evt, Object what)      {         if ("Uscita...".equals(what))            show("ExitPanel");/*          MessageBox.confirm(this, "Circuiti elettrici",                                    "Vuoi uscire dal programma?",                             "*Exit*");*/        else if ("*CancelExit*".equals(what)) {            show("Circuito");        }        else if ("*Exit*".equals(what)) {            hide();            if (circuitoDisplay!=null)              circuitoDisplay.stopSimulation();                          //salva su file C://Simul il numero 1            salva();            show("Circuito");                        exit.exit(this, null);        } else if ("Aiuto".equals(what))            help.displayHelp("help/circuiti", "circuiti");        else if ("Aggiungi resistore...".equals(what)) {            show("Circuito");            Dialog dialog=new ResistoreDialog(circuitoDisplay);            dialog.reshape(100,100,400,200);            dialog.show();            toFront();        } else if ("Aggiungi induttore...".equals(what)) {            show("Circuito");            Dialog dialog=new InduttoreDialog(circuitoDisplay);            dialog.reshape(100,100,400,200);            dialog.show();            toFront();        } else if ("Aggiungi condensatore...".equals(what)) {            show("Circuito");            Dialog dialog=new CondensatoreDialog(circuitoDisplay);            dialog.reshape(100,100,400,200);            dialog.show();            toFront();        } else if ("Aggiungi corto circuito".equals(what)) {            show("Circuito");            circuitoDisplay.aggiungiComponente(new CortoCircuito());        } else if ("Aggiungi generatore f.e.m. ...".equals(what)) {            show("Circuito");            Dialog dialog=new GeneratoreDialog(circuitoDisplay);            dialog.reshape(100,100,400,300);            dialog.show();            toFront();        } else if ("Cancella componente".equals(what)) {            show("Circuito");            circuitoDisplay.cancellaComponente();        } else if ("Cancella esperimento...".equals(what)) {            MessageBox.confirm(this, "Elettromagnetismo",                               "Vuoi cancellare l'esperimento?",                               "*Reset*");        } else if ("*Reset*".equals(what)) {           show("Circuito");            circuitoDisplay.reset();        } else if ("Esegui simulazione...".equals(what)) {            Dialog dialog=new EseguiDialog(circuitoDisplay);            dialog.reshape(100,100,400,200);            dialog.show();            toFront();        } else if ("Circuito".equals(what)) {            show("Circuito");        } else if ("Grafico".equals(what)) {            if (circuito.isSimulationAvailable()) {                 show("Circuito");                circuitoDisplay.graficoComponente(this, graficoDisplay);            } else                MessageBox.message(this,"Circuiti elettrici",                        "Devi eseguire una simulazione prima di\n"+                        "visualizzare il grafico.");        } else if ("*Grafico*".equals(what)) {            show("Grafico");        } else if ("Tabella".equals(what)) {            if (circuito.isSimulationAvailable()) {                show("Circuito");                circuitoDisplay.tabellaComponente(this, simulationTable);            } else              MessageBox.message(this,"Circuiti elettrici",                  "Devi eseguire una simulazione prima di\n"+                  "visualizzare la tabella.");        } else if ("*Tabella*".equals(what))            show("Tabella");                return true;      }    public boolean handleEvent(Event evt)      { if (evt.id==Event.WINDOW_DESTROY)            show("ExitPanel");        return super.handleEvent(evt);      }public void salva()      {                     try {	            Writer out = new FileWriter(Preloader.getSimulFileName());            out.write("1");            out.flush();            out.close();           }        catch(Exception e)           {     	      System.out.println("File non trovato");     	    }       	    }  }
+package circuiti;
+
+import java.io.*;
+
+import ui.*;
+
+import util.Preloader;
+import java.awt.*;
+
+
+public class CircuitiFrame extends TrackedFrame implements StatusDisplayer
+  { ImageLoader il;
+    HelpDisplayer help;
+    Parameters parm;
+    Label info_text;
+    Exit exit;
+    CardLayout cards;
+    Panel       cardsPanel;
+
+    Circuito circuito;
+    CircuitoDisplay circuitoDisplay;
+    GraficoDisplay  graficoDisplay;
+    SimulationTable  simulationTable;
+    
+
+
+    public CircuitiFrame() {
+
+        super("Circuiti elettrici");
+
+    }
+
+
+    public void go(Parameters parm, Exit exit)
+      { 
+        il=UserInterface.getImageLoader();
+        help=UserInterface.getHelpDisplayer();
+        this.parm=parm;
+        this.exit=exit;
+        setIconImage(il.load("icons/circuito.gif"));
+
+        circuito=new Circuito();
+
+        if (!WindowsTracker.isEnabled())
+
+            createMenuBar();
+
+        createToolbar();
+
+        createPanel();
+
+        createStatus();
+
+        resize(512, 384);
+        centerOnScreen();
+
+      }
+
+
+    void createMenuBar()
+      { Font font=new Font("Helvetica", Font.PLAIN, 12);
+
+        MenuBar mb=new MenuBar();
+        Menu m=new Menu("Esperimento");
+
+        m.add("Aggiungi resistore...");
+        m.add("Aggiungi induttore...");
+        m.add("Aggiungi condensatore...");
+        m.add("Aggiungi generatore f.e.m. ...");
+        m.add("Aggiungi corto circuito");
+        m.addSeparator();
+        m.add("Cancella componente");
+        m.add("Cancella esperimento...");
+        m.addSeparator();
+        m.add("Esegui simulazione...");
+        m.addSeparator();
+        m.add("Uscita...");
+        m.setFont(font);
+        mb.add(m);
+
+
+        m=new Menu("Visualizza");
+        m.add("Circuito");
+        m.add("Grafico");
+        m.add("Tabella");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Aiuto");
+        m.add("Aiuto");
+        mb.add(m);
+
+        mb.setFont(font);
+        //setMenuBar(mb);
+      }
+
+    void createToolbar() {
+        Panel panel=new Panel();
+        panel.setLayout(new BorderLayout(1,1));
+
+        Toolbar tb=new Toolbar(Toolbar.VERTICAL);
+
+        tb.addTool("Esegui simulazione...", il.load("icons/go.gif"),
+                   "Esegui simulazione");
+        tb.addTool("Circuito", il.load("icons/circuito.gif"),
+                   "Visualizza circuito");
+        tb.addTool("Tabella", il.load("icons/tabella.gif"),
+                   "Visualizza tabella");
+        tb.addTool("Grafico", il.load("icons/grafico.gif"),
+                   "Visualizza grafico");
+        tb.addTool("Uscita...", il.load("icons/exit.gif"),
+                   "Esci dal programma");
+
+        tb.setStatusDisplayer(this);
+        panel.add("West", tb);
+
+        Toolbar tb2=new Toolbar(Toolbar.VERTICAL);
+        tb2.addTool("Aggiungi resistore...", il.load("icons/resist.gif"),
+                   "Aggiungi resistore");
+        tb2.addTool("Aggiungi induttore...", il.load("icons/indutt.gif"),
+                   "Aggiungi induttore");
+        tb2.addTool("Aggiungi condensatore...", il.load("icons/condens.gif"),
+                   "Aggiungi condensatore");
+        tb2.addTool("Aggiungi generatore f.e.m. ...", 
+                    il.load("icons/gener.gif"),
+                   "Aggiungi generatore f.e.m.");
+        tb2.addTool("Aggiungi corto circuito", il.load("icons/corto.gif"),
+                   "Aggiungi corto circuito");
+        tb2.addTool("Cancella componente", il.load("icons/gomma.gif"),
+                   "Cancella componente");
+
+
+        
+        tb2.setStatusDisplayer(this);
+        panel.add("East", tb2);
+
+        Panel dummy=new Panel();
+        panel.add("South", new SizeConstraint(dummy, new Dimension(1,1)));
+
+        add("West", panel);
+    }
+
+
+    void createPanel(){
+        cardsPanel=new Panel();
+        cards=new CardLayout();
+        cardsPanel.setLayout(cards);
+
+        circuitoDisplay=new CircuitoDisplay(circuito, this);
+        cardsPanel.add("Circuito", circuitoDisplay);
+
+        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));
+        
+        graficoDisplay=new GraficoDisplay();
+        graficoDisplay.setStatusDisplayer(this);
+        cardsPanel.add("Grafico", graficoDisplay);
+
+        simulationTable=new SimulationTable();
+        cardsPanel.add("Tabella", simulationTable);
+
+        add("Center", cardsPanel);
+    }
+
+    public void createStatus()
+      { Font font=new Font("Helvetica", Font.PLAIN, 12);
+        info_text=new Label("");
+        info_text.setBackground(Color.lightGray);
+        info_text.setAlignment(Label.CENTER);
+        info_text.setFont(font);
+        add("South", info_text);
+      }
+
+    
+    public void show(String name)
+      { cards.show(cardsPanel, name);
+        cardsPanel.repaint();
+      }
+
+    public void showStatus(String status)
+      { info_text.setText(status);
+      }
+
+/*
+    public void centerOnScreen()
+      { Dimension s=getToolkit().getScreenSize();
+        Dimension d=size();
+
+        move( (s.width-d.width)/2, (s.height-d.height)/2 );
+      }*/
+
+    public boolean action(Event evt, Object what)
+      { 
+        if ("Uscita...".equals(what))
+            show("ExitPanel");
+/*          MessageBox.confirm(this, "Circuiti elettrici", 
+                                   "Vuoi uscire dal programma?",
+                             "*Exit*");*/
+        else if ("*CancelExit*".equals(what)) {
+
+            show("Circuito");
+        }
+        else if ("*Exit*".equals(what)) {
+
+            hide();
+            if (circuitoDisplay!=null)
+              circuitoDisplay.stopSimulation();
+             
+             //salva su file C://Simul il numero 1
+            salva();
+            show("Circuito");
+            
+            exit.exit(this, null);
+        } else if ("Aiuto".equals(what))
+
+            help.displayHelp("help/circuiti", "circuiti");
+        else if ("Aggiungi resistore...".equals(what)) {
+            show("Circuito");
+            Dialog dialog=new ResistoreDialog(circuitoDisplay);
+            dialog.reshape(100,100,400,200);
+            dialog.show();
+            toFront();
+        } else if ("Aggiungi induttore...".equals(what)) {
+            show("Circuito");
+            Dialog dialog=new InduttoreDialog(circuitoDisplay);
+            dialog.reshape(100,100,400,200);
+            dialog.show();
+            toFront();
+        } else if ("Aggiungi condensatore...".equals(what)) {
+            show("Circuito");
+            Dialog dialog=new CondensatoreDialog(circuitoDisplay);
+            dialog.reshape(100,100,400,200);
+            dialog.show();
+            toFront();
+        } else if ("Aggiungi corto circuito".equals(what)) {
+            show("Circuito");
+            circuitoDisplay.aggiungiComponente(new CortoCircuito());
+        } else if ("Aggiungi generatore f.e.m. ...".equals(what)) {
+            show("Circuito");
+            Dialog dialog=new GeneratoreDialog(circuitoDisplay);
+            dialog.reshape(100,100,400,300);
+            dialog.show();
+            toFront();
+        } else if ("Cancella componente".equals(what)) {
+            show("Circuito");
+            circuitoDisplay.cancellaComponente();
+        } else if ("Cancella esperimento...".equals(what)) {
+            MessageBox.confirm(this, "Elettromagnetismo",
+                               "Vuoi cancellare l'esperimento?",
+                               "*Reset*");
+        } else if ("*Reset*".equals(what)) {
+           show("Circuito");
+            circuitoDisplay.reset();
+        } else if ("Esegui simulazione...".equals(what)) {
+            Dialog dialog=new EseguiDialog(circuitoDisplay);
+            dialog.reshape(100,100,400,200);
+            dialog.show();
+            toFront();
+        } else if ("Circuito".equals(what)) {
+            show("Circuito");
+        } else if ("Grafico".equals(what)) {
+            if (circuito.isSimulationAvailable()) { 
+
+                show("Circuito");
+                circuitoDisplay.graficoComponente(this, graficoDisplay);
+            } else
+                MessageBox.message(this,"Circuiti elettrici",
+                        "Devi eseguire una simulazione prima di\n"+
+                        "visualizzare il grafico.");
+        } else if ("*Grafico*".equals(what)) {
+
+            show("Grafico");
+        } else if ("Tabella".equals(what)) {
+            if (circuito.isSimulationAvailable()) {
+                show("Circuito");
+                circuitoDisplay.tabellaComponente(this, simulationTable);
+            } else
+              MessageBox.message(this,"Circuiti elettrici",
+                  "Devi eseguire una simulazione prima di\n"+
+                  "visualizzare la tabella.");
+        } else if ("*Tabella*".equals(what))
+            show("Tabella");        
+
+        return true;
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.id==Event.WINDOW_DESTROY)
+            show("ExitPanel");
+        return super.handleEvent(evt);
+      }
+
+public void salva()
+      {
+               
+      try {	
+            Writer out = new FileWriter(Preloader.getSimulFileName());
+            out.write("1");
+            out.flush();
+            out.close(); 
+          } 
+       catch(Exception e) 
+          {
+     	      System.out.println("File non trovato");
+     	    }       	
+    }
+
+  }

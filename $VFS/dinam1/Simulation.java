@@ -1,1 +1,155 @@
-package dinam1;import dinam1.*;import util.*;/** * A base class for the simulation types * @author Pasquale Foggia * @version 0.99, Dec 1997 */public abstract class Simulation  { protected double t1; // start time    protected double t2; // stop time    double t[];    double x[], y[];    int steps=0;    public synchronized double getStartTime()      { return t1;      }    public synchronized double getStopTime()      { return t2;      }        /**     * Runts the simulation up to the time specified by     * the user, from the last stop time.     * The values are saved at intervals specified by the user     */        public abstract /*synchronized*/ void runUpTo(double endTime, double timeStep);    /**     * Returns the number of saved steps     */    public synchronized int getStepCount()      { return steps;      }    public synchronized double getTime(int step)      { return t[step];      }    public synchronized double getX(int step)      { return x[step];      }    public synchronized double getY(int step)      { return y[step];      }    /**     * Returns the min and max values of x and y     * xx[0] and yy[0] will receive the min,     * xx[1] and yy[1] will receive the max.     */    public synchronized void getMinMaxXY(double xx[], double yy[])      { int i;        if (steps<1)          { xx[0]=0;            yy[0]=0;            xx[1]=0;            yy[1]=0;            return;          }        xx[0]=x[0];        xx[1]=x[0];        yy[0]=y[0];        yy[1]=y[0];        for(i=1; i<steps; i++)          { if (x[i]<xx[0])              xx[0]=x[i];            else if (x[i]>xx[1])              xx[1]=x[i];            if (y[i]<yy[0])              yy[0]=y[i];            else if (y[i]>yy[1])              yy[1]=y[i];          }                }        /**     * Search the output n. with the given name.     * If not found, returns getOutputCount (always time).     */    public synchronized int searchOutputName (String name) {        int i;        for (i=0;i<getOutputCount();i++)            if (getOutputName(i).equals(name))                return i;                    return getOutputCount();    }    /**     * Types of output information available     */    public abstract  /*synchronized*/ int getOutputCount();    /**     * Names associated to the output information     */    public synchronized String getOutputName(int i)      { return getOutputShortName(i);      }    /**     * Short names associated to the output information     */    public abstract /*synchronized*/ String getOutputShortName(int i);    /**     * Value of output information     */    public abstract /*synchronized */ double getOutput(int i, int step);        public String getTableHeading()      { int i;        int n=getOutputCount();        StringBuffer sb=new StringBuffer();        sb.append(Format.format("^8", "t[s]"));        for(i=0; i<n; i++)          { sb.append("\t");            sb.append(Format.format("^11", getOutputShortName(i)));          }        return sb.toString();      }    public synchronized String getTableRow(int step)      { int i;        int n=getOutputCount();        StringBuffer sb=new StringBuffer();        sb.append(Format.format("8.3", t[step]));        for(i=0; i<n; i++)          { sb.append("\t");            sb.append(Format.format("11.2", getOutput(i, step)));          }        sb.append(" ");        return sb.toString();      }  }
+package dinam1;
+
+import dinam1.*;
+import util.*;
+
+/**
+ * A base class for the simulation types
+ * @author Pasquale Foggia
+ * @version 0.99, Dec 1997
+ */
+public abstract class Simulation
+  { protected double t1; // start time
+    protected double t2; // stop time
+
+    double t[];
+    double x[], y[];
+    int steps=0;
+
+
+    public synchronized double getStartTime()
+      { return t1;
+      }
+
+    public synchronized double getStopTime()
+      { return t2;
+      }
+
+
+    
+    /**
+     * Runts the simulation up to the time specified by
+     * the user, from the last stop time.
+     * The values are saved at intervals specified by the user
+     */    
+    public abstract /*synchronized*/ void runUpTo(double endTime, double timeStep);
+
+
+    /**
+     * Returns the number of saved steps
+     */
+    public synchronized int getStepCount()
+      { return steps;
+      }
+
+    public synchronized double getTime(int step)
+      { return t[step];
+      }
+
+    public synchronized double getX(int step)
+      { return x[step];
+      }
+
+    public synchronized double getY(int step)
+      { return y[step];
+      }
+
+    /**
+     * Returns the min and max values of x and y
+     * xx[0] and yy[0] will receive the min,
+     * xx[1] and yy[1] will receive the max.
+     */
+    public synchronized void getMinMaxXY(double xx[], double yy[])
+      { int i;
+
+        if (steps<1)
+          { xx[0]=0;
+            yy[0]=0;
+            xx[1]=0;
+            yy[1]=0;
+            return;
+          }
+
+        xx[0]=x[0];
+        xx[1]=x[0];
+        yy[0]=y[0];
+        yy[1]=y[0];
+        for(i=1; i<steps; i++)
+          { if (x[i]<xx[0])
+              xx[0]=x[i];
+            else if (x[i]>xx[1])
+              xx[1]=x[i];
+            if (y[i]<yy[0])
+              yy[0]=y[i];
+            else if (y[i]>yy[1])
+              yy[1]=y[i];
+          }          
+      }
+    
+    /**
+     * Search the output n. with the given name.
+     * If not found, returns getOutputCount (always time).
+     */
+    public synchronized int searchOutputName (String name) {
+        int i;
+        for (i=0;i<getOutputCount();i++)
+            if (getOutputName(i).equals(name))
+                return i;            
+        return getOutputCount();
+    }
+
+    /**
+     * Types of output information available
+     */
+    public abstract  /*synchronized*/ int getOutputCount();
+
+    /**
+     * Names associated to the output information
+     */
+    public synchronized String getOutputName(int i)
+      { return getOutputShortName(i);
+      }
+
+
+    /**
+     * Short names associated to the output information
+     */
+    public abstract /*synchronized*/ String getOutputShortName(int i);
+
+    /**
+     * Value of output information
+     */
+    public abstract /*synchronized */ double getOutput(int i, int step);
+    
+
+    public String getTableHeading()
+      { int i;
+        int n=getOutputCount();
+        StringBuffer sb=new StringBuffer();
+
+        sb.append(Format.format("^8", "t[s]"));
+        for(i=0; i<n; i++)
+          { sb.append("\t");
+            sb.append(Format.format("^11", getOutputShortName(i)));
+          }
+
+        return sb.toString();
+
+      }
+
+    public synchronized String getTableRow(int step)
+      { int i;
+        int n=getOutputCount();
+        StringBuffer sb=new StringBuffer();
+
+        sb.append(Format.format("8.3", t[step]));
+        for(i=0; i<n; i++)
+          { sb.append("\t");
+            sb.append(Format.format("11.2", getOutput(i, step)));
+          }
+        sb.append(" ");
+        return sb.toString();
+      }
+
+
+  }

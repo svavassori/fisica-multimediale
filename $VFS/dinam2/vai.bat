@@ -1,1 +1,5 @@
-javac InitialGravDialog.javajavac InitialElastDialog.javacd ..java  dinam2.Dinam2
+javac InitialGravDialog.java
+javac InitialElastDialog.java
+cd ..
+java  dinam2.Dinam2
+

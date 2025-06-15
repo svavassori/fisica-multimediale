@@ -1,1 +1,452 @@
-package ottica;import java.io.*;import ui.*;import java.awt.*;import java.awt.event.*;import util.Preloader;// crea la dialog per i setting in un thread separato perché// così posso gestire altri messaggi.class SettingsDialogCreator extends Thread {    public Component target;    public Settings initial;    static public volatile boolean bloccato;    public SettingsDialogCreator (Component _target, Settings _initial) {        bloccato=true;        target=_target;        initial=_initial;    };    public void run() {        Dialog dialog=new SettingsDialog(target, initial);        dialog.reshape(50, 50, 500, 420);        dialog.show(true);        dialog.move(50, 50);                bloccato=false;    }}public class OtticaFrame extends TrackedFrame implements StatusDisplayer  { ImageLoader il;    HelpDisplayer help;    Parameters parm;    Panel cardsPanel;    CardLayout cards;    Settings settings;    Label info_text;    PaintableCanvas legenda;    Panel colorPanel;    Panel panel;    Panel sub_panel;    SimulationDisplay simulationDisplay;    SuperficieDisplay superficieDisplay;    LastraDisplay lastraDisplay;    LenteDisplay lenteDisplay;    PrismaDisplay prismaDisplay;    boolean displayOggetto=false;    boolean displayRaggio=true;    Exit exit;        SettingsDialogCreator sett_dialog_creator;    public OtticaFrame() {        super("Ottica geometrica");    }    public void go(Parameters parm, Exit exit) {        this.exit=exit;        il=UserInterface.getImageLoader();        help=UserInterface.getHelpDisplayer();        this.parm=parm;        settings=new Settings(parm);        setIconImage(il.load("icons/simul.gif"));        if (!WindowsTracker.isEnabled())            createMenuBar();        createToolbar();        createPanel();        createStatus();        resize(512, 420);        centerOnScreen();      }    void createMenuBar()      { Font font=new Font("Helvetica", Font.PLAIN, 12);        MenuBar mb=new MenuBar();        Menu m=new Menu("Esperimento");        m.add("Imposta parametri...");        m.addSeparator();        m.add("Uscita...");        m.setFont(font);        mb.add(m);        m=new Menu("Visualizza");                m.add("Oggetto");        m.add("Raggio");        m.setFont(font);        mb.add(m);        m=new Menu("Aiuto");        m.add("Aiuto");        mb.add(m);        mb.setFont(font);        //setMenuBar(mb);      }    void createToolbar()      { Toolbar tb=new Toolbar(Toolbar.VERTICAL);        tb.addTool("Imposta parametri...", il.load("icons/settings.gif"),                   "Imposta parametri");        tb.addTool("Oggetto", il.load("icons/object.gif"),                   "Inserisci un oggetto");        tb.addTool("Raggio", il.load("icons/rays.gif"),                   "Inserisci un raggio di luce");        tb.addTool("Uscita...", il.load("icons/exit.gif"),                   "Esci dal programma");        tb.setStatusDisplayer(this);        add("West", tb);      }    void createPanel() {         // crea la legenda        legenda=new PaintableCanvas();        legenda.setBackground(Color.white);        legenda.setFont(new Font("Helvetica", Font.BOLD, 12));        FontMetrics fm=legenda.getFontMetrics(legenda.getFont());        Dimension d=new Dimension(100, fm.getHeight()*5+10);                //crea il pannello per i colori        colorPanel=new Panel();        colorPanel.setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));        Button rosso=new Button("Rosso");        rosso.setForeground(Color.red);        colorPanel.add("", rosso);        Button giallo=new Button("Giallo");        giallo.setForeground(Color.yellow);        colorPanel.add("", giallo);        Button blu=new Button("Blu");        blu.setForeground(Color.blue);        colorPanel.add("", blu);        panel=new Panel();        panel.setLayout(new BorderLayout());        sub_panel=new Panel();        sub_panel.setLayout(new BorderLayout());        sub_panel.add("Center", new SizeConstraint(legenda, d));        sub_panel.add("East", colorPanel);        panel.add("North", sub_panel);        cards=new CardLayout();        cardsPanel=new Panel();        cardsPanel.setLayout(cards);        superficieDisplay=new SuperficieDisplay(settings, legenda, this);        cardsPanel.add("Superficie", superficieDisplay);        lastraDisplay=new LastraDisplay(settings, legenda, this);        cardsPanel.add("Lastra", lastraDisplay);        lenteDisplay=new LenteDisplay(settings, legenda, this);        cardsPanel.add("Lente", lenteDisplay);        prismaDisplay=new PrismaDisplay(settings, legenda, this);        cardsPanel.add("Prisma", prismaDisplay);                cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));        panel.add("Center", cardsPanel);        add("Center", panel);                simulationDisplay=superficieDisplay;        legenda.setPainter(simulationDisplay);        show("Superficie");    }    public void createStatus() {        Font font=new Font("Helvetica", Font.PLAIN, 12);        info_text=new Label("");        info_text.setBackground(Color.lightGray);        info_text.setAlignment(Label.CENTER);        info_text.setFont(font);        add("South", info_text);    }        public void show(String name) {        superficieDisplay.repaint();        if (name.equals("Superficie")) {           simulationDisplay=superficieDisplay;        }        else if (name.equals("Lastra"))          { simulationDisplay=lastraDisplay;          }        else if (name.equals("Lente"))          { simulationDisplay=lenteDisplay;          }        else if (name.equals("Prisma"))          { simulationDisplay=prismaDisplay;          }        cards.show(cardsPanel, name);        cardsPanel.repaint();        //panel.repaint();                legenda.setPainter(simulationDisplay);        if (displayOggetto && !simulationDisplay.canDisplayOggetto())          { displayOggetto=false;            displayRaggio=true;          }        else if (displayRaggio && !simulationDisplay.canDisplayRaggio())          { displayRaggio=false;            displayOggetto=true;          }        if (displayOggetto)          { simulationDisplay.displayOggetto();            colorPanel.hide();            invalidate();            validate();          }        else          { simulationDisplay.displayRaggio();            displayRaggio=true;            colorPanel.show();            invalidate();            validate();          }        cardsPanel.repaint();        legenda.repaint();      }    public void showStatus(String status)      { info_text.setText(status);        info_text.repaint(0);        info_text.paint(info_text.getGraphics());      }/*    public void centerOnScreen()      { Dimension s=getToolkit().getScreenSize();        Dimension d=size();        move( (s.width-d.width)/2, (s.height-d.height)/2 );      }*/        public boolean action(Event evt, Object what)      {         /*if (sett_dialog_creator.bloccato==true)            return true;*/        if ("Uscita...".equals(what))            show("ExitPanel");        else if ("*CancelExit*".equals(what)) {            switch(settings.tipo) {                case Settings.LENTE: 		                    show("Lente");                    break;                case Settings.PRISMA: 		                    show("Prisma");                    break;                case Settings.LASTRA: 		                    show("Lastra");                    break;                case Settings.SUPERFICIE: 	                    show("Superficie");                    break;                                }        }        else if ("*Exit*".equals(what))          { hide();           //salva su file C://Simul il numero 1            salva();            switch(settings.tipo) {                case Settings.LENTE: 		                    show("Lente");                    break;                case Settings.PRISMA: 		                    show("Prisma");                    break;                case Settings.LASTRA: 		                    show("Lastra");                    break;                case Settings.SUPERFICIE: 	                    show("Superficie");                    break;                                }            exit.exit(this,null);          }        else if ("Imposta parametri...".equals(what))          {                         showStatus ("Attendi, carico  bitmaps...");            sett_dialog_creator=new SettingsDialogCreator(this,settings);            sett_dialog_creator.start();          }        else if ("Oggetto".equals(what))          { if (simulationDisplay.canDisplayOggetto())              { colorPanel.hide();                displayOggetto=true;                displayRaggio=false;                simulationDisplay.displayOggetto();                invalidate();                validate();              }            else              MessageBox.alert(this,"Ottica geometrica",                    "Solo lente e superficie possono visualizzare\n"+                    "l'immagine di un oggetto");          }        else if ("Raggio".equals(what))          { if (simulationDisplay.canDisplayRaggio())              { colorPanel.show();                displayOggetto=false;                displayRaggio=true;                simulationDisplay.displayRaggio();                invalidate();                                validate();              }            else              MessageBox.alert(this,"Ottica geometrica",                    "Solo prisma, lastra e  superficie possono\n"+                    "visualizzare il percorso di un raggio");          }        else if ("Rosso".equals(what))          simulationDisplay.setColoreRaggio(SimulationDisplay.ROSSO);        else if ("Giallo".equals(what))          simulationDisplay.setColoreRaggio(SimulationDisplay.GIALLO);        else if ("Blu".equals(what))          simulationDisplay.setColoreRaggio(SimulationDisplay.BLU);        else if ("Aiuto".equals(what))          help.displayHelp("help/ottica", "ottica");        else if (what!=null && what instanceof Settings)          { settings=(Settings)what;                        superficieDisplay.set(settings);            lastraDisplay.set(settings);            lenteDisplay.set(settings);            prismaDisplay.set(settings);            switch(settings.tipo)              { case Settings.LENTE: 		                         show("Lente");                         break;                case Settings.PRISMA: 		                         show("Prisma");                         break;                case Settings.LASTRA: 		                         show("Lastra");                         break;                case Settings.SUPERFICIE: 	                         show("Superficie");                         break;              }          }                return true;      }    public boolean handleEvent(Event evt)      { if (evt.id==Event.WINDOW_DESTROY)            show("ExitPanel");        return super.handleEvent(evt);      }    public void salva()      {         try {	            Writer out = new FileWriter(Preloader.getSimulFileName());            out.write("1");            out.flush();            out.close();           }        catch(Exception e)           {     	      System.out.println("File non trovato");     	    }       	    }    }
+package ottica;
+
+import java.io.*;
+import ui.*;
+import java.awt.*;
+
+import java.awt.event.*;
+
+import util.Preloader;
+
+
+
+// crea la dialog per i setting in un thread separato perché
+
+// così posso gestire altri messaggi.
+
+class SettingsDialogCreator extends Thread {
+
+    public Component target;
+
+    public Settings initial;
+
+    static public volatile boolean bloccato;
+
+
+
+    public SettingsDialogCreator (Component _target, Settings _initial) {
+
+        bloccato=true;
+
+        target=_target;
+
+        initial=_initial;
+
+    };
+
+
+
+    public void run() {
+
+        Dialog dialog=new SettingsDialog(target, initial);
+
+        dialog.reshape(50, 50, 500, 420);
+
+        dialog.show(true);
+
+        dialog.move(50, 50);        
+
+        bloccato=false;
+
+    }
+
+}
+
+
+public class OtticaFrame extends TrackedFrame implements StatusDisplayer
+  { ImageLoader il;
+    HelpDisplayer help;
+    Parameters parm;
+    Panel cardsPanel;
+    CardLayout cards;
+    Settings settings;
+    Label info_text;
+    PaintableCanvas legenda;
+    Panel colorPanel;
+
+    Panel panel;
+
+    Panel sub_panel;
+    SimulationDisplay simulationDisplay;
+    SuperficieDisplay superficieDisplay;
+    LastraDisplay lastraDisplay;
+    LenteDisplay lenteDisplay;
+    PrismaDisplay prismaDisplay;
+    boolean displayOggetto=false;
+    boolean displayRaggio=true;
+    Exit exit;
+
+    
+
+    SettingsDialogCreator sett_dialog_creator;
+
+
+    public OtticaFrame() {
+
+        super("Ottica geometrica");
+
+    }
+
+
+
+    public void go(Parameters parm, Exit exit) {
+
+        this.exit=exit;
+        il=UserInterface.getImageLoader();
+        help=UserInterface.getHelpDisplayer();
+        this.parm=parm;
+        settings=new Settings(parm);
+        setIconImage(il.load("icons/simul.gif"));
+
+        if (!WindowsTracker.isEnabled())
+
+            createMenuBar();
+
+
+        createToolbar();
+
+        createPanel();
+
+        createStatus();
+
+        resize(512, 420);
+        centerOnScreen();
+      }
+
+
+    void createMenuBar()
+      { Font font=new Font("Helvetica", Font.PLAIN, 12);
+
+        MenuBar mb=new MenuBar();
+        Menu m=new Menu("Esperimento");
+
+        m.add("Imposta parametri...");
+        m.addSeparator();
+        m.add("Uscita...");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Visualizza");
+        
+        m.add("Oggetto");
+        m.add("Raggio");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Aiuto");
+        m.add("Aiuto");
+        mb.add(m);
+
+        mb.setFont(font);
+        //setMenuBar(mb);
+      }
+
+    void createToolbar()
+      { Toolbar tb=new Toolbar(Toolbar.VERTICAL);
+
+        tb.addTool("Imposta parametri...", il.load("icons/settings.gif"),
+                   "Imposta parametri");
+        tb.addTool("Oggetto", il.load("icons/object.gif"),
+                   "Inserisci un oggetto");
+        tb.addTool("Raggio", il.load("icons/rays.gif"),
+                   "Inserisci un raggio di luce");
+        tb.addTool("Uscita...", il.load("icons/exit.gif"),
+                   "Esci dal programma");
+
+        tb.setStatusDisplayer(this);
+        add("West", tb);
+      }
+
+
+    void createPanel() { 
+
+
+        // crea la legenda
+        legenda=new PaintableCanvas();
+        legenda.setBackground(Color.white);
+        legenda.setFont(new Font("Helvetica", Font.BOLD, 12));
+        FontMetrics fm=legenda.getFontMetrics(legenda.getFont());
+        Dimension d=new Dimension(100, fm.getHeight()*5+10);
+        
+        //crea il pannello per i colori
+
+        colorPanel=new Panel();
+        colorPanel.setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));
+        Button rosso=new Button("Rosso");
+        rosso.setForeground(Color.red);
+        colorPanel.add("", rosso);
+        Button giallo=new Button("Giallo");
+        giallo.setForeground(Color.yellow);
+        colorPanel.add("", giallo);
+        Button blu=new Button("Blu");
+        blu.setForeground(Color.blue);
+        colorPanel.add("", blu);
+
+
+        panel=new Panel();
+
+        panel.setLayout(new BorderLayout());
+
+        sub_panel=new Panel();
+
+        sub_panel.setLayout(new BorderLayout());
+
+
+        sub_panel.add("Center", new SizeConstraint(legenda, d));
+
+        sub_panel.add("East", colorPanel);
+
+
+        panel.add("North", sub_panel);
+
+        cards=new CardLayout();
+
+        cardsPanel=new Panel();
+        cardsPanel.setLayout(cards);
+
+        superficieDisplay=new SuperficieDisplay(settings, legenda, this);
+        cardsPanel.add("Superficie", superficieDisplay);
+
+        lastraDisplay=new LastraDisplay(settings, legenda, this);
+        cardsPanel.add("Lastra", lastraDisplay);
+
+        lenteDisplay=new LenteDisplay(settings, legenda, this);
+        cardsPanel.add("Lente", lenteDisplay);
+
+        prismaDisplay=new PrismaDisplay(settings, legenda, this);
+        cardsPanel.add("Prisma", prismaDisplay);
+        
+        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));
+
+
+        panel.add("Center", cardsPanel);
+        add("Center", panel);
+
+        
+        simulationDisplay=superficieDisplay;
+        legenda.setPainter(simulationDisplay);
+
+        show("Superficie");
+
+    }
+
+    public void createStatus() {
+
+        Font font=new Font("Helvetica", Font.PLAIN, 12);
+        info_text=new Label("");
+        info_text.setBackground(Color.lightGray);
+        info_text.setAlignment(Label.CENTER);
+        info_text.setFont(font);
+        add("South", info_text);
+    }
+
+    
+    public void show(String name) {
+
+        superficieDisplay.repaint();
+        if (name.equals("Superficie")) {
+           simulationDisplay=superficieDisplay;
+        }
+        else if (name.equals("Lastra"))
+          { simulationDisplay=lastraDisplay;
+          }
+        else if (name.equals("Lente"))
+          { simulationDisplay=lenteDisplay;
+          }
+        else if (name.equals("Prisma"))
+          { simulationDisplay=prismaDisplay;
+          }
+        cards.show(cardsPanel, name);
+
+        cardsPanel.repaint();
+
+        //panel.repaint();
+
+        
+
+        legenda.setPainter(simulationDisplay);
+        if (displayOggetto && !simulationDisplay.canDisplayOggetto())
+          { displayOggetto=false;
+            displayRaggio=true;
+          }
+        else if (displayRaggio && !simulationDisplay.canDisplayRaggio())
+          { displayRaggio=false;
+            displayOggetto=true;
+          }
+        if (displayOggetto)
+          { simulationDisplay.displayOggetto();
+            colorPanel.hide();
+            invalidate();
+            validate();
+          }
+        else
+          { simulationDisplay.displayRaggio();
+            displayRaggio=true;
+            colorPanel.show();
+            invalidate();
+            validate();
+          }
+        cardsPanel.repaint();
+        legenda.repaint();
+      }
+
+    public void showStatus(String status)
+      { info_text.setText(status);
+
+        info_text.repaint(0);
+
+        info_text.paint(info_text.getGraphics());
+
+      }
+
+/*
+    public void centerOnScreen()
+      { Dimension s=getToolkit().getScreenSize();
+        Dimension d=size();
+
+        move( (s.width-d.width)/2, (s.height-d.height)/2 );
+      }
+
+*/
+
+    
+    public boolean action(Event evt, Object what)
+      { 
+
+        /*if (sett_dialog_creator.bloccato==true)
+
+            return true;*/
+
+
+        if ("Uscita...".equals(what))
+            show("ExitPanel");
+        else if ("*CancelExit*".equals(what)) {
+
+            switch(settings.tipo) {
+                case Settings.LENTE: 		
+                    show("Lente");
+                    break;
+                case Settings.PRISMA: 		
+                    show("Prisma");
+                    break;
+                case Settings.LASTRA: 		
+                    show("Lastra");
+                    break;
+                case Settings.SUPERFICIE: 	
+                    show("Superficie");
+                    break;                    
+            }
+        }
+        else if ("*Exit*".equals(what))
+          { hide();
+           //salva su file C://Simul il numero 1
+            salva();
+            switch(settings.tipo) {
+                case Settings.LENTE: 		
+                    show("Lente");
+                    break;
+                case Settings.PRISMA: 		
+                    show("Prisma");
+                    break;
+                case Settings.LASTRA: 		
+                    show("Lastra");
+                    break;
+                case Settings.SUPERFICIE: 	
+                    show("Superficie");
+                    break;                    
+            }
+            exit.exit(this,null);
+          }
+        else if ("Imposta parametri...".equals(what))
+          {             
+
+            showStatus ("Attendi, carico  bitmaps...");
+
+            sett_dialog_creator=new SettingsDialogCreator(this,settings);
+
+            sett_dialog_creator.start();
+          }
+        else if ("Oggetto".equals(what))
+          { if (simulationDisplay.canDisplayOggetto())
+              { colorPanel.hide();
+                displayOggetto=true;
+                displayRaggio=false;
+                simulationDisplay.displayOggetto();
+                invalidate();
+                validate();
+              }
+            else
+              MessageBox.alert(this,"Ottica geometrica",
+                    "Solo lente e superficie possono visualizzare\n"+
+                    "l'immagine di un oggetto");
+          }
+        else if ("Raggio".equals(what))
+          { if (simulationDisplay.canDisplayRaggio())
+              { colorPanel.show();
+                displayOggetto=false;
+                displayRaggio=true;
+                simulationDisplay.displayRaggio();
+
+                invalidate();                
+                validate();
+              }
+            else
+              MessageBox.alert(this,"Ottica geometrica",
+                    "Solo prisma, lastra e  superficie possono\n"+
+                    "visualizzare il percorso di un raggio");
+          }
+        else if ("Rosso".equals(what))
+          simulationDisplay.setColoreRaggio(SimulationDisplay.ROSSO);
+        else if ("Giallo".equals(what))
+          simulationDisplay.setColoreRaggio(SimulationDisplay.GIALLO);
+        else if ("Blu".equals(what))
+          simulationDisplay.setColoreRaggio(SimulationDisplay.BLU);
+        else if ("Aiuto".equals(what))
+          help.displayHelp("help/ottica", "ottica");
+        else if (what!=null && what instanceof Settings)
+          { settings=(Settings)what;            
+            superficieDisplay.set(settings);
+            lastraDisplay.set(settings);
+            lenteDisplay.set(settings);
+            prismaDisplay.set(settings);
+            switch(settings.tipo)
+              { case Settings.LENTE: 		
+                         show("Lente");
+                         break;
+                case Settings.PRISMA: 		
+                         show("Prisma");
+                         break;
+                case Settings.LASTRA: 		
+                         show("Lastra");
+                         break;
+                case Settings.SUPERFICIE: 	
+                         show("Superficie");
+                         break;
+              }
+          }
+        
+        return true;
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.id==Event.WINDOW_DESTROY)
+            show("ExitPanel");
+        return super.handleEvent(evt);
+      }
+
+
+    public void salva()
+      {   
+      try {	
+            Writer out = new FileWriter(Preloader.getSimulFileName());
+            out.write("1");
+            out.flush();
+            out.close(); 
+          } 
+       catch(Exception e) 
+          {
+     	      System.out.println("File non trovato");
+     	    }       	
+    }
+  
+  }

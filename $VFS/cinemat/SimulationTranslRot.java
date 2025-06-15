@@ -1,1 +1,206 @@
-package cinemat;import util.*;import numeric.*;/** * A base class for the simulation of base translational motion * with a relative rotational motion * @author Pasquale Foggia * @version 0.99, Jan 1997 */public class SimulationTranslRot extends Simulation  { Settings settings;    public SimulationTranslRot(Settings settings)      { this.settings=settings;      }        /**     * Runts the simulation up to the time specified by     * the user.     * The values are saved at intervals specified by the user     */        public synchronized void runUpTo(double endTime, double timeStep)      { steps=(int)Math.ceil(endTime/timeStep)+1;        int i;        double vb=settings.vel_base;        double a=settings.acc_base;        double vang=settings.vel_rel_ang;                t=new double[steps];        x=new double[steps];        y=new double[steps];        for(i=0; i<steps; i++)          { t[i]=i*timeStep;            double r=vb*t[i]+0.5*a*t[i]*t[i];            double ang=vang*t[i];            x[i]=r*Math.cos(ang);            y[i]=r*Math.sin(ang);          }      }    /**     * Types of output information available     * The time is included, and should be always outpun n. 0     */    public synchronized int getOutputCount()      { return 17;      }    /**     * Names associated to the output information     * The time is included, and should be always outpun n. 0     */    public synchronized String getOutputName(int i)      { String name[]={                         "Tempo",                        "Posizione X",                        "Posizione Y",                        "Raggio polare",                        "Angolo",                        "Velocità X",                        "Velocità Y",                        "Velocità",                        "Velocità radiale",                        "Velocità tangenziale",                        "Velocità angolare",                        "Accelerazione X",                        "Accelerazione Y",                        "Accelerazione coriolis",                        "Accelerazione di trascinamento",                        "Frequenza",                        "Periodo"                      };        return name[i];      }    /**     * Short names associated to the output information     * The time is included, and should be always outpun n. 0     */    public synchronized String getOutputShortName(int i)      { String name[]={                         "t[s]",                        "X[m]",                        "Y[m]",                        "R[m]",                        "Ang[rad]",                        "Vx[m/s]",                        "Vy[m/s]",                        "V[m/s]",                        "Vr[m/s]",                        "Vt[m/s]",                        "Va[rad/s]",                        "Ax[m/s^2]",                        "Ay[m/s^2]",                        "Ac[m/s^2]",                        "At[m/s^2]",                        "Freq[Hz]",                        "T[s]"                      };        return name[i];      }    /**     * Value of output information     * The time is included, and should be always outpun n. 0     */    public synchronized double getOutput(int i, int step)      {         double vb=settings.vel_base;        double a=settings.acc_base;        double vang=settings.vel_rel_ang;        double r=vb*t[step]+0.5*a*t[step]*t[step];        double ang=vang*t[step];        double sin=Math.sin(ang);        double cos=Math.cos(ang);        double vr=vb+a*t[step];        switch(i)          { case 0:              return t[step];            case 1:              return x[step];            case 2:              return y[step];            case 3:              return r;            case 4:              return ang;            case 5:              return vr*cos-r*sin*vang;            case 6:              return vr*sin+r*cos*vang;            case 7:              //return Functions.hypot(getOutput(5,step), getOutput(6, step));              return Functions.hypot(vr,vang*vr*t[step]); // da fax 12-11-98            case 8:              return vr;            case 9:              return r*vang;            case 10:              return vang;            case 11:              return a*cos-2*vr*sin*vang-r*cos*vang*vang;            case 12:              return a*sin+2*vr*cos*vang-r*sin*vang*vang;            case 13:              return  2*vr*vang;            case 14:              return vr*vang*vang*t[step]; //a-r*vang*vang;            case 15:              return Math.abs(vang/(2*Math.PI));            case 16:              return Math.abs(2*Math.PI/vang);            default:              throw new IllegalArgumentException();          }      }    /**     * Returns the vector of the indices of the most interesting outputs     * to be displayed during the simulation     */    public int[] getInterestingInfo()      { int n=10;        int idx[]=new int[n];        idx[0]=0;        idx[1]=1;        idx[2]=2;        idx[3]=3;        idx[4]=4;        idx[5]=5;        idx[6]=6;        idx[7]=10;        idx[8]=15;        idx[9]=16;        return idx;      }    public double getSin(int step)      { if (step>=steps)          return 0;        double vang=settings.vel_rel_ang;        double ang=vang*t[step];        return Math.sin(ang);      }    public double getCos(int step)      { if (step>=steps)          return 1;        double vang=settings.vel_rel_ang;        double ang=vang*t[step];        return Math.cos(ang);      }  }
+package cinemat;
+
+import util.*;
+import numeric.*;
+
+/**
+ * A base class for the simulation of base translational motion
+ * with a relative rotational motion
+ * @author Pasquale Foggia
+ * @version 0.99, Jan 1997
+ */
+public class SimulationTranslRot extends Simulation
+  { Settings settings;
+
+    public SimulationTranslRot(Settings settings)
+      { this.settings=settings;
+      }
+
+    
+    /**
+     * Runts the simulation up to the time specified by
+     * the user.
+     * The values are saved at intervals specified by the user
+     */    
+    public synchronized void runUpTo(double endTime, double timeStep)
+      { steps=(int)Math.ceil(endTime/timeStep)+1;
+        int i;
+        double vb=settings.vel_base;
+        double a=settings.acc_base;
+        double vang=settings.vel_rel_ang;
+        
+        t=new double[steps];
+        x=new double[steps];
+        y=new double[steps];
+
+        for(i=0; i<steps; i++)
+          { t[i]=i*timeStep;
+            double r=vb*t[i]+0.5*a*t[i]*t[i];
+            double ang=vang*t[i];
+            x[i]=r*Math.cos(ang);
+            y[i]=r*Math.sin(ang);
+          }
+      }
+
+    /**
+     * Types of output information available
+     * The time is included, and should be always outpun n. 0
+     */
+    public synchronized int getOutputCount()
+      { return 17;
+      }
+
+    /**
+     * Names associated to the output information
+     * The time is included, and should be always outpun n. 0
+     */
+    public synchronized String getOutputName(int i)
+      { String name[]={ 
+                        "Tempo",
+                        "Posizione X",
+                        "Posizione Y",
+                        "Raggio polare",
+                        "Angolo",
+                        "Velocità X",
+                        "Velocità Y",
+                        "Velocità",
+                        "Velocità radiale",
+                        "Velocità tangenziale",
+                        "Velocità angolare",
+                        "Accelerazione X",
+                        "Accelerazione Y",
+                        "Accelerazione coriolis",
+                        "Accelerazione di trascinamento",
+                        "Frequenza",
+                        "Periodo"
+                      };
+        return name[i];
+      }
+
+
+    /**
+     * Short names associated to the output information
+     * The time is included, and should be always outpun n. 0
+     */
+    public synchronized String getOutputShortName(int i)
+      { String name[]={ 
+                        "t[s]",
+                        "X[m]",
+                        "Y[m]",
+                        "R[m]",
+                        "Ang[rad]",
+                        "Vx[m/s]",
+                        "Vy[m/s]",
+                        "V[m/s]",
+                        "Vr[m/s]",
+                        "Vt[m/s]",
+                        "Va[rad/s]",
+                        "Ax[m/s^2]",
+                        "Ay[m/s^2]",
+                        "Ac[m/s^2]",
+                        "At[m/s^2]",
+                        "Freq[Hz]",
+                        "T[s]"
+                      };
+        return name[i];
+      }
+
+    /**
+     * Value of output information
+     * The time is included, and should be always outpun n. 0
+     */
+    public synchronized double getOutput(int i, int step)
+      { 
+        double vb=settings.vel_base;
+        double a=settings.acc_base;
+        double vang=settings.vel_rel_ang;
+
+        double r=vb*t[step]+0.5*a*t[step]*t[step];
+        double ang=vang*t[step];
+        double sin=Math.sin(ang);
+        double cos=Math.cos(ang);
+        double vr=vb+a*t[step];
+
+        switch(i)
+          { case 0:
+              return t[step];
+            case 1:
+              return x[step];
+            case 2:
+              return y[step];
+            case 3:
+              return r;
+            case 4:
+              return ang;
+            case 5:
+              return vr*cos-r*sin*vang;
+            case 6:
+              return vr*sin+r*cos*vang;
+            case 7:
+              //return Functions.hypot(getOutput(5,step), getOutput(6, step));
+              return Functions.hypot(vr,vang*vr*t[step]); // da fax 12-11-98
+            case 8:
+              return vr;
+            case 9:
+              return r*vang;
+            case 10:
+              return vang;
+            case 11:
+              return a*cos-2*vr*sin*vang-r*cos*vang*vang;
+            case 12:
+              return a*sin+2*vr*cos*vang-r*sin*vang*vang;
+            case 13:
+              return  2*vr*vang;
+            case 14:
+              return vr*vang*vang*t[step]; //a-r*vang*vang;
+            case 15:
+              return Math.abs(vang/(2*Math.PI));
+            case 16:
+              return Math.abs(2*Math.PI/vang);
+            default:
+              throw new IllegalArgumentException();
+          }
+      }
+
+    /**
+     * Returns the vector of the indices of the most interesting outputs
+     * to be displayed during the simulation
+     */
+    public int[] getInterestingInfo()
+      { int n=10;
+        int idx[]=new int[n];
+
+        idx[0]=0;
+        idx[1]=1;
+        idx[2]=2;
+        idx[3]=3;
+        idx[4]=4;
+        idx[5]=5;
+        idx[6]=6;
+        idx[7]=10;
+        idx[8]=15;
+        idx[9]=16;
+
+        return idx;
+      }
+
+
+
+    public double getSin(int step)
+      { if (step>=steps)
+          return 0;
+        double vang=settings.vel_rel_ang;
+        double ang=vang*t[step];
+        return Math.sin(ang);
+      }
+
+    public double getCos(int step)
+      { if (step>=steps)
+          return 1;
+        double vang=settings.vel_rel_ang;
+        double ang=vang*t[step];
+        return Math.cos(ang);
+      }
+
+
+  }

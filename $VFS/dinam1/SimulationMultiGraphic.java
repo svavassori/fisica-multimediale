@@ -1,1 +1,25 @@
-package dinam1;import ui.*;import util.*;import java.awt.*;/** * A canvas displaying a graph of the simulation */public class SimulationMultiGraphic extends MultiGraphicDisplay  {     public void setData(int dispnum, Simulation sim, int ychoice)      { double x[], y[];                       int n=sim.getStepCount();        x=new double[n];        y=new double[n];                int i;        for(i=0; i<n; i++) {            x[i]=sim.getTime(i);            y[i]=sim.getOutput(ychoice, i);        }       getDisplay(dispnum).setData(x,"t [s]",                                    y, sim.getOutputShortName(ychoice));      }  }
+package dinam1;
+
+import ui.*;
+import util.*;
+import java.awt.*;
+
+/**
+ * A canvas displaying a graph of the simulation
+ */
+public class SimulationMultiGraphic extends MultiGraphicDisplay
+  { 
+    public void setData(int dispnum, Simulation sim, int ychoice)
+      { double x[], y[];               
+        int n=sim.getStepCount();
+        x=new double[n];
+        y=new double[n];        
+        int i;
+        for(i=0; i<n; i++) {
+            x[i]=sim.getTime(i);
+            y[i]=sim.getOutput(ychoice, i);
+        }
+       getDisplay(dispnum).setData(x,"t [s]", 
+                                   y, sim.getOutputShortName(ychoice));
+      }
+  }

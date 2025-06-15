@@ -1,1 +1,12 @@
-package ottica;/** * Classe usata per memorizzari i risultati del calcolo dell'intersezione   * di un raggio luminoso con la superficie * Usato solo da SuperficieDisplay */class SuperficieIntersezione  { double x;    double y;    double ang;  }
+package ottica;
+
+/**
+ * Classe usata per memorizzari i risultati del calcolo dell'intersezione  
+ * di un raggio luminoso con la superficie
+ * Usato solo da SuperficieDisplay
+ */
+class SuperficieIntersezione
+  { double x;
+    double y;
+    double ang;
+  }

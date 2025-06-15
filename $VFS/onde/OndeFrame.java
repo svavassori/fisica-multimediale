@@ -1,1 +1,304 @@
-package onde;import java.io.*;import util.Preloader;import ui.*;import java.awt.*;public class OndeFrame extends TrackedFrame implements StatusDisplayer  { ImageLoader il;    HelpDisplayer help;    Panel cardsPanel;    CardLayout cards;    Settings settings;    Label info_text;    PaintableCanvas legenda;    SimulationDisplay simulationDisplay;    Reflect reflect;    ReflectSettings reflectSettings;    Refract refract;    RefractSettings refractSettings;    Interf interf;    Exit exit;    public OndeFrame() {        super("Onde");    }    public void go (Parameters parm, Exit exit)      { this.exit=exit;        il=UserInterface.getImageLoader();        help=UserInterface.getHelpDisplayer();        settings=new Settings();        setIconImage(il.load("icons/interf.gif"));        reflectSettings=new ReflectSettings();        refractSettings=new RefractSettings();        if (!WindowsTracker.isEnabled())            createMenuBar();        createToolbar();        createPanel();        createStatus();        resize(512, 384);        centerOnScreen();      }    void createMenuBar()      { Font font=new Font("Helvetica", Font.PLAIN, 12);        MenuBar mb=new MenuBar();        Menu m=new Menu("Esperimento");        m.add("Imposta parametri...");        m.add("Esegui");        m.add("Uscita...");        m.setFont(font);        mb.add(m);        m=new Menu("Visualizza");        m.add("Riflessione");        m.add("Rifrazione");        m.add("Interferenza");        m.setFont(font);        mb.add(m);        m=new Menu("Aiuto");        m.add("Aiuto");        mb.add(m);        mb.setFont(font);        //setMenuBar(mb);      }    void createToolbar()      { Toolbar tb=new Toolbar(Toolbar.VERTICAL);        tb.addTool("Imposta parametri...", il.load("icons/settings.gif"),                   "Imposta parametri");        tb.addTool("Esegui", il.load("icons/go.gif"),                   "Esegui simulazione");        tb.addTool("Riflessione", il.load("icons/reflect.gif"),                   "Visualizza riflessione");        tb.addTool("Rifrazione", il.load("icons/refract.gif"),                   "Visualizza rifrazione");        tb.addTool("Interferenza", il.load("icons/interf.gif"),                   "Visualizza interferenza");        tb.addTool("Uscita...", il.load("icons/exit.gif"),                   "Esci dal programma");        tb.setStatusDisplayer(this);        add("West", tb);      }    void createPanel()      {         Panel panel=new Panel();        panel.setLayout(new BorderLayout());        legenda=new PaintableCanvas();        legenda.setBackground(Color.white);        legenda.setFont(new Font("Helvetica", Font.BOLD, 12));        FontMetrics fm=legenda.getFontMetrics(legenda.getFont());        Dimension d=new Dimension(100, fm.getHeight()*4+10);        panel.add("North", new SizeConstraint(legenda, d));        cardsPanel=new Panel();        cards=new CardLayout();        cardsPanel.setLayout(cards);        reflect=new Reflect(settings, legenda, this);        cardsPanel.add("Riflessione", reflect);        refract=new Refract(settings, legenda, this);        cardsPanel.add("Rifrazione", refract);        interf=new Interf(settings, legenda, this);        cardsPanel.add("Interferenza", interf);        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));                panel.add("Center", cardsPanel);                add("Center", panel);        reflect.set(settings);        refract.set(settings);        interf.set(settings);        show("Interferenza");        simulationDisplay=interf;        legenda.setPainter(interf);        legenda.repaint();      }    public void createStatus()      { Font font=new Font("Helvetica", Font.PLAIN, 12);        info_text=new Label("");        info_text.setBackground(Color.lightGray);        info_text.setAlignment(Label.CENTER);        info_text.setFont(font);        add("South", info_text);      }        public void show(String name)      { cards.show(cardsPanel, name);        cardsPanel.repaint();      }    public void showStatus(String status)      { info_text.setText(status);      }/*    public void centerOnScreen()      { Dimension s=getToolkit().getScreenSize();        Dimension d=size();        move( (s.width-d.width)/2, (s.height-d.height)/2 );      }*/    public boolean action(Event evt, Object what)      {         if ("Uscita...".equals(what))            show("ExitPanel");        else if ("*CancelExit*".equals(what)) {            if (simulationDisplay==interf)                 show("Interferenza");            else if (simulationDisplay==reflect)                show("Riflessione");            else if (simulationDisplay==refract)                show("Rifrazione");        }        else if ("*Exit*".equals(what))          { hide();            if (simulationDisplay!=null)              simulationDisplay.stopAnimation();             //salva su file C://Simul il numero 1            salva();            if (simulationDisplay==interf)                 show("Interferenza");            else if (simulationDisplay==reflect)                show("Riflessione");            else if (simulationDisplay==refract)                show("Rifrazione");                        exit.exit(this, null);          }        else if ("Imposta parametri...".equals(what))          { Dialog dialog=new SettingsDialog(this, settings);            dialog.reshape(50, 50, 500, 400);            dialog.show(true);            dialog.move(50, 50);            toFront();          }        else if ("Esegui".equals(what))          {             simulationDisplay.stopAnimation();            simulationDisplay.startAnimation();          }        else if ("Riflessione".equals(what))          { Dialog dialog=new ReflectDialog(this, reflectSettings);            dialog.reshape(50, 50, 400, 300);            dialog.show(true);            dialog.move(50, 50);            toFront();          }        else if ("Rifrazione".equals(what))          { Dialog dialog=new RefractDialog(this, refractSettings);            dialog.reshape(50, 50, 400, 300);            dialog.show(true);            dialog.move(50, 50);            toFront();          }        else if ("Interferenza".equals(what))          { simulationDisplay.stopAnimation();            show("Interferenza");            simulationDisplay=interf;            legenda.setPainter(interf);            legenda.repaint();          }        else if ("Aiuto".equals(what))          help.displayHelp("help/onde", "onde");        else if (what!=null && what instanceof Settings)          { settings=(Settings)what;            simulationDisplay.stopAnimation();            reflect.set(settings);            refract.set(settings);            interf.set(settings);          }        else if (what!=null && what instanceof ReflectSettings)          { simulationDisplay.stopAnimation();            reflectSettings=(ReflectSettings)what;            show("Riflessione");            simulationDisplay=reflect;            legenda.setPainter(reflect);            reflect.set(reflectSettings);          }        else if (what!=null && what instanceof RefractSettings)          { simulationDisplay.stopAnimation();            refractSettings=(RefractSettings)what;            show("Rifrazione");            simulationDisplay=refract;            legenda.setPainter(refract);            refract.set(refractSettings);          }                return true;      }    public boolean handleEvent(Event evt)      { if (evt.id==Event.WINDOW_DESTROY)            show("ExitPanel");        return super.handleEvent(evt);      }    public void salva()      {                  try {	            Writer out = new FileWriter(Preloader.getSimulFileName());            out.write("1");            out.flush();            out.close();           }        catch(Exception e)           {     	      System.out.println("File non trovato");     	    }       	    }    }
+package onde;
+
+import java.io.*;
+import util.Preloader;
+import ui.*;
+import java.awt.*;
+
+
+public class OndeFrame extends TrackedFrame implements StatusDisplayer
+  { ImageLoader il;
+    HelpDisplayer help;
+    Panel cardsPanel;
+    CardLayout cards;
+    Settings settings;
+    Label info_text;
+    PaintableCanvas legenda;
+
+    SimulationDisplay simulationDisplay;
+    Reflect reflect;
+    ReflectSettings reflectSettings;
+    Refract refract;
+    RefractSettings refractSettings;
+    Interf interf;
+
+    Exit exit;
+
+
+    public OndeFrame() {
+
+        super("Onde");
+
+    }
+
+
+
+
+    public void go (Parameters parm, Exit exit)
+      { this.exit=exit;
+
+        il=UserInterface.getImageLoader();
+        help=UserInterface.getHelpDisplayer();
+        settings=new Settings();
+        setIconImage(il.load("icons/interf.gif"));
+
+        reflectSettings=new ReflectSettings();
+        refractSettings=new RefractSettings();
+
+        if (!WindowsTracker.isEnabled())
+
+            createMenuBar();
+
+        createToolbar();
+
+        createPanel();
+
+        createStatus();
+
+        resize(512, 384);
+        centerOnScreen();
+
+      }
+
+
+    void createMenuBar()
+      { Font font=new Font("Helvetica", Font.PLAIN, 12);
+
+        MenuBar mb=new MenuBar();
+        Menu m=new Menu("Esperimento");
+
+        m.add("Imposta parametri...");
+        m.add("Esegui");
+        m.add("Uscita...");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Visualizza");
+        m.add("Riflessione");
+        m.add("Rifrazione");
+        m.add("Interferenza");
+        m.setFont(font);
+        mb.add(m);
+
+        m=new Menu("Aiuto");
+        m.add("Aiuto");
+        mb.add(m);
+
+        mb.setFont(font);
+        //setMenuBar(mb);
+      }
+
+    void createToolbar()
+      { Toolbar tb=new Toolbar(Toolbar.VERTICAL);
+
+        tb.addTool("Imposta parametri...", il.load("icons/settings.gif"),
+                   "Imposta parametri");
+        tb.addTool("Esegui", il.load("icons/go.gif"),
+                   "Esegui simulazione");
+        tb.addTool("Riflessione", il.load("icons/reflect.gif"),
+                   "Visualizza riflessione");
+        tb.addTool("Rifrazione", il.load("icons/refract.gif"),
+                   "Visualizza rifrazione");
+        tb.addTool("Interferenza", il.load("icons/interf.gif"),
+                   "Visualizza interferenza");
+        tb.addTool("Uscita...", il.load("icons/exit.gif"),
+                   "Esci dal programma");
+
+        tb.setStatusDisplayer(this);
+        add("West", tb);
+      }
+
+
+    void createPanel()
+      { 
+        Panel panel=new Panel();
+        panel.setLayout(new BorderLayout());
+
+        legenda=new PaintableCanvas();
+        legenda.setBackground(Color.white);
+        legenda.setFont(new Font("Helvetica", Font.BOLD, 12));
+        FontMetrics fm=legenda.getFontMetrics(legenda.getFont());
+        Dimension d=new Dimension(100, fm.getHeight()*4+10);
+        panel.add("North", new SizeConstraint(legenda, d));
+
+        cardsPanel=new Panel();
+        cards=new CardLayout();
+        cardsPanel.setLayout(cards);
+
+        reflect=new Reflect(settings, legenda, this);
+        cardsPanel.add("Riflessione", reflect);
+
+        refract=new Refract(settings, legenda, this);
+        cardsPanel.add("Rifrazione", refract);
+
+        interf=new Interf(settings, legenda, this);
+        cardsPanel.add("Interferenza", interf);
+
+        cardsPanel.add("ExitPanel", new ExitPanel("*Exit*","*CancelExit*"));
+        
+        panel.add("Center", cardsPanel);
+        
+        add("Center", panel);
+
+
+
+        reflect.set(settings);
+
+        refract.set(settings);
+
+        interf.set(settings);
+
+
+
+        show("Interferenza");
+
+        simulationDisplay=interf;
+
+        legenda.setPainter(interf);
+
+        legenda.repaint();
+
+
+
+      }
+
+    public void createStatus()
+      { Font font=new Font("Helvetica", Font.PLAIN, 12);
+        info_text=new Label("");
+        info_text.setBackground(Color.lightGray);
+        info_text.setAlignment(Label.CENTER);
+        info_text.setFont(font);
+        add("South", info_text);
+      }
+
+    
+    public void show(String name)
+      { cards.show(cardsPanel, name);
+        cardsPanel.repaint();
+      }
+
+    public void showStatus(String status)
+      { info_text.setText(status);
+      }
+
+/*
+    public void centerOnScreen()
+      { Dimension s=getToolkit().getScreenSize();
+        Dimension d=size();
+
+        move( (s.width-d.width)/2, (s.height-d.height)/2 );
+      }*/
+
+    public boolean action(Event evt, Object what)
+      { 
+
+        if ("Uscita...".equals(what))
+            show("ExitPanel");
+        else if ("*CancelExit*".equals(what)) {
+
+            if (simulationDisplay==interf) 
+                show("Interferenza");
+            else if (simulationDisplay==reflect)
+                show("Riflessione");
+            else if (simulationDisplay==refract)
+                show("Rifrazione");
+        }
+        else if ("*Exit*".equals(what))
+          { hide();
+            if (simulationDisplay!=null)
+              simulationDisplay.stopAnimation();
+             //salva su file C://Simul il numero 1
+            salva();
+            if (simulationDisplay==interf) 
+                show("Interferenza");
+            else if (simulationDisplay==reflect)
+                show("Riflessione");
+            else if (simulationDisplay==refract)
+                show("Rifrazione");            
+            exit.exit(this, null);
+          }
+        else if ("Imposta parametri...".equals(what))
+          { Dialog dialog=new SettingsDialog(this, settings);
+            dialog.reshape(50, 50, 500, 400);
+            dialog.show(true);
+            dialog.move(50, 50);
+            toFront();
+          }
+        else if ("Esegui".equals(what))
+          { 
+            simulationDisplay.stopAnimation();
+            simulationDisplay.startAnimation();
+          }
+        else if ("Riflessione".equals(what))
+          { Dialog dialog=new ReflectDialog(this, reflectSettings);
+            dialog.reshape(50, 50, 400, 300);
+            dialog.show(true);
+            dialog.move(50, 50);
+            toFront();
+          }
+        else if ("Rifrazione".equals(what))
+          { Dialog dialog=new RefractDialog(this, refractSettings);
+            dialog.reshape(50, 50, 400, 300);
+            dialog.show(true);
+            dialog.move(50, 50);
+            toFront();
+          }
+        else if ("Interferenza".equals(what))
+          { simulationDisplay.stopAnimation();
+            show("Interferenza");
+            simulationDisplay=interf;
+            legenda.setPainter(interf);
+            legenda.repaint();
+          }
+        else if ("Aiuto".equals(what))
+          help.displayHelp("help/onde", "onde");
+        else if (what!=null && what instanceof Settings)
+          { settings=(Settings)what;
+            simulationDisplay.stopAnimation();
+            reflect.set(settings);
+            refract.set(settings);
+            interf.set(settings);
+          }
+        else if (what!=null && what instanceof ReflectSettings)
+          { simulationDisplay.stopAnimation();
+            reflectSettings=(ReflectSettings)what;
+
+            show("Riflessione");
+            simulationDisplay=reflect;
+            legenda.setPainter(reflect);
+            reflect.set(reflectSettings);
+          }
+        else if (what!=null && what instanceof RefractSettings)
+          { simulationDisplay.stopAnimation();
+            refractSettings=(RefractSettings)what;
+
+            show("Rifrazione");
+            simulationDisplay=refract;
+            legenda.setPainter(refract);
+            refract.set(refractSettings);
+          }
+        
+        return true;
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.id==Event.WINDOW_DESTROY)
+            show("ExitPanel");
+        return super.handleEvent(evt);
+      }
+
+    public void salva()
+      {            
+      try {	
+            Writer out = new FileWriter(Preloader.getSimulFileName());
+            out.write("1");
+            out.flush();
+            out.close(); 
+          } 
+       catch(Exception e) 
+          {
+     	      System.out.println("File non trovato");
+     	    }       	
+    }
+  
+  }

@@ -1,1 +1,134 @@
-package ui;import util.*;import java.awt.*;/** * A numeric input component, made by a text field and a * scrollbar. * This item reports an action event to the caller with itself as * the action object each time that the value changes. * @author P. Foggia * @version 0.99, Dec 1997 */public class NumericInput extends Panel  { Scrollbar scroll;    TextField field;    int min, max, value;    double scale;    static final int ESC=27; // Codice ASCII del tasto ESC    public NumericInput(int min, int max, int value, double scale)      { this.min=min;        this.max=max;        this.scale=scale;        setLayout(null);        scroll=new Scrollbar(Scrollbar.HORIZONTAL, value, 1, min, max);        String s1=Format.remove(min*scale, scale);        String s2=Format.remove(max*scale, scale);        int l=Math.max(s1.length(), s2.length())+3;        if (l<4)          l=4;        if (l>8)          l=8;        field=new TextField(l);        setValue(value, true);        add(field);        add(scroll);      }    public double getValue()      { return value*scale;      }    public void setValue(double d)      { setValue((int)Math.floor(d/scale+0.4999), true);      }    public int getValue(boolean dummy)      { return value;      }    public void setValue(int v, boolean dummy)      { value=v;        if (value<min)          value=min;        if (value>max)          value=max;        if (scroll!=null)          scroll.setValue(value);        if (field!=null)          field.setText(Format.remove(value*scale, scale));      }    public synchronized void layout()      { Dimension d=size();        Dimension fd=field.preferredSize();        Dimension sd=scroll.preferredSize();        int h=Math.max(sd.height, fd.height);        field.resize(fd.width, h);        field.move(5, (d.height-h)/2);        scroll.reshape(10+fd.width, (d.height-h)/2,                       d.width-15-fd.width,                        h);      }    public Dimension preferredSize()      { Dimension fd=field.preferredSize();        Dimension sd=scroll.preferredSize();        return new Dimension(fd.width*5+10,                              Math.max(fd.height, sd.height)+10);      }    public Dimension minimumSize()      { return preferredSize();      }    public boolean handleEvent(Event evt)      { if (evt.target==scroll ||            (evt.target==field && evt.id==Event.KEY_PRESS && evt.key==27))          { value=scroll.getValue();            field.setText(Format.remove(value*scale, scale));            notifyChange();          }        else if (evt.target==field)          {             if ((evt.id==Event.KEY_PRESS && evt.key=='\n')                || evt.id==Event.LOST_FOCUS)              {                double v=Double.valueOf(field.getText()).doubleValue();               setValue(v);               notifyChange();               return true;              }            else if (evt.id==Event.KEY_PRESS && evt.key==ESC)              {               double v=getValue();               setValue(v);               return true;              }          }        return super.handleEvent(evt);      }    void notifyChange()      { deliverEvent(new Event(this, Event.ACTION_EVENT, this));      }      }
+package ui;
+
+import util.*;
+import java.awt.*;
+
+/**
+ * A numeric input component, made by a text field and a
+ * scrollbar.
+ * This item reports an action event to the caller with itself as
+ * the action object each time that the value changes.
+ * @author P. Foggia
+ * @version 0.99, Dec 1997
+ */
+public class NumericInput extends Panel
+  { Scrollbar scroll;
+    TextField field;
+    int min, max, value;
+    double scale;
+
+    static final int ESC=27; // Codice ASCII del tasto ESC
+
+    public NumericInput(int min, int max, int value, double scale)
+      { this.min=min;
+        this.max=max;
+        this.scale=scale;
+        setLayout(null);
+
+        scroll=new Scrollbar(Scrollbar.HORIZONTAL, value, 1, min, max);
+        String s1=Format.remove(min*scale, scale);
+        String s2=Format.remove(max*scale, scale);
+        int l=Math.max(s1.length(), s2.length())+3;
+        if (l<4)
+          l=4;
+        if (l>8)
+          l=8;
+        field=new TextField(l);
+
+
+        setValue(value, true);
+
+        add(field);
+        add(scroll);
+
+      }
+
+    public double getValue()
+      { return value*scale;
+      }
+
+    public void setValue(double d)
+      { setValue((int)Math.floor(d/scale+0.4999), true);
+      }
+
+    public int getValue(boolean dummy)
+      { return value;
+      }
+
+    public void setValue(int v, boolean dummy)
+      { value=v;
+        if (value<min)
+          value=min;
+        if (value>max)
+          value=max;
+        if (scroll!=null)
+          scroll.setValue(value);
+        if (field!=null)
+          field.setText(Format.remove(value*scale, scale));
+      }
+
+    public synchronized void layout()
+      { Dimension d=size();
+
+        Dimension fd=field.preferredSize();
+        Dimension sd=scroll.preferredSize();
+
+        int h=Math.max(sd.height, fd.height);
+        field.resize(fd.width, h);
+
+        field.move(5, (d.height-h)/2);
+        scroll.reshape(10+fd.width, (d.height-h)/2,
+                       d.width-15-fd.width, 
+                       h);
+
+      }
+
+    public Dimension preferredSize()
+      { Dimension fd=field.preferredSize();
+        Dimension sd=scroll.preferredSize();
+
+        return new Dimension(fd.width*5+10, 
+                             Math.max(fd.height, sd.height)+10);
+
+      }
+
+    public Dimension minimumSize()
+      { return preferredSize();
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.target==scroll ||
+            (evt.target==field && evt.id==Event.KEY_PRESS && evt.key==27))
+          { value=scroll.getValue();
+            field.setText(Format.remove(value*scale, scale));
+            notifyChange();
+          }
+        else if (evt.target==field)
+          { 
+            if ((evt.id==Event.KEY_PRESS && evt.key=='\n')
+                || evt.id==Event.LOST_FOCUS)
+              { 
+               double v=Double.valueOf(field.getText()).doubleValue();
+               setValue(v);
+               notifyChange();
+               return true;
+              }
+            else if (evt.id==Event.KEY_PRESS && evt.key==ESC)
+              {
+               double v=getValue();
+               setValue(v);
+               return true;
+              }
+          }
+        return super.handleEvent(evt);
+      }
+
+    void notifyChange()
+      { deliverEvent(new Event(this, Event.ACTION_EVENT, this));
+
+      }
+
+    
+
+  }
+

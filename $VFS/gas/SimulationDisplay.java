@@ -1,1 +1,369 @@
-package gas;import ui.*;import numeric.*;import util.*;import java.awt.*;/** * The canvas used to display the simulation (actually a panel) * @author Pasquale Foggia * @version 0.90, Dec 1997 */public class SimulationDisplay extends SpriteCanvas                                implements Runnable, Painter  {  double win_x1, win_y1, win_x2, win_y2;     CursorChanger curs;     Thread thread=null;     StatusDisplayer status;     Settings settings;     Simulation simulation;     static final double frameDelay=1.0/10;     Image ball;     int ball_width, ball_height;     static final double log10=Math.log(10);     CoordinateMapper map;     PaintableCanvas legenda;     double time;     public SimulationDisplay(Settings settings, PaintableCanvas legenda,                              StatusDisplayer status)       { setDelayedMode(true);         this.legenda=legenda;         legenda.setPainter(this);         this.status=status;         this.settings=settings;         simulation=null;         curs=new CursorChanger(this);         curs.setCursor(Frame.CROSSHAIR_CURSOR);         setBackground(Color.white);         ball=UserInterface.getImageLoader().load("icons/red-ball.gif");         ball_width=ball.getWidth(this);         ball_height=ball.getHeight(this);         map=new CoordinateMapper();         map.setIsometric(true);         recomputeWindow();       }     public synchronized void startAnimation()       { stopAnimation();         thread=new Thread(this);         thread.start();                }     public synchronized void stopAnimation()       { if (thread!=null)           { thread.stop();           }         thread=null;       }     public void run()       { recomputeWindow();         time=0;         updateBeforeResize();         repaintBackground();         double maxTime=simulation.getTotalDuration();         double dt=frameDelay/30*maxTime;         int mol=simulation.getMolNumber();         int i;         for(i=0; i<mol; i++)           showSprite(i, true);         nextFrame();         long millis=System.currentTimeMillis();         Graphics g=getBackgroundGraphics();         Rectangle clip=new Rectangle(0,0,dim.width, dim.height);                  while (time<=maxTime)           {              millis+=(long)(frameDelay*1000);             if (millis>=System.currentTimeMillis())               { // paintLines(g, clip, time-2*dt);                 paintBackground();                 int m;                 for(m=0; m<mol; m++)                   { Point pt=getBallPos(m);                     moveSprite(m, pt.x, pt.y);                   }                 nextFrame(millis);               }             time+=dt;           }         updateBeforeResize();       }     /**      * Paint the legenda      */     public void paint(Component com, Graphics g)       { if (simulation==null)           return;         Dimension d=com.size();         FontMetrics fm=g.getFontMetrics();         int h=fm.getHeight();         int asc=fm.getAscent();         String title="";         String txt[][]= { {"",""}, {"",""}, {"",""}, {"",""} };         double vms=simulation.getMeasuredVms();         if (settings.tipo==Settings.MOTO_BROWNIANO)           { title="Moto Browniano";             txt[0][1]="Temp. istantanea "+                 Format.format(".1", simulation.getTempFromVms(vms))+" °K";             txt[1][0]="Vel. quad. media "+                 Format.format(".3", simulation.getExpectedVelocity())+" m/s";             txt[1][1]="Vel. q. m. osservata "+                  Format.format(".3", Math.sqrt(vms))+" m/s";             txt[2][0]="Cammino libero medio "+                 Format.format_e(".3", simulation.getExpectedFreePath())+" m";             txt[2][1]="Camm. medio osservato "+                  Format.format_e(".3", simulation.getMeasuredPath())+" m";             txt[3][0]="Urti tra molecole "+simulation.getMolHits();             txt[3][1]="Urti con pareti "+simulation.getSideHits();           }         else if (settings.tipo==Settings.MOTO_NMOLECOLE)           { title="Moto di n molecole";             txt[0][0]="Press. istantanea "+                 Format.format_e(".3", simulation.getPressFromVms(vms))+" Pa";             txt[0][1]="Temp. istantanea "+                 Format.format(".1", simulation.getTempFromVms(vms))+" °K";             txt[1][0]="Vel. quad. media "+                 Format.format(".3", simulation.getExpectedVelocity())+" m/s";             txt[1][1]="Vel. q. m. osservata "+                  Format.format(".3", Math.sqrt(vms))+" m/s";             txt[2][0]="Vel. più probabile "+                 Format.format(".3", simulation.getModalVelocity())+" m/s";             txt[2][1]="Urti con pareti "+simulation.getSideHits();           }         int w=fm.stringWidth(title);         g.setColor(Color.lightGray);         g.drawString(title, (d.width-w)/2+1, asc+3+1);         g.setColor(Color.blue);         g.drawString(title, (d.width-w)/2-2, asc+3-2);         g.setColor(Color.black);          int row, col;         for(row=0; row<4; row++)           for(col=0; col<2; col++)             { g.drawString(txt[row][col], 10+col*(d.width/2),                                           3+asc+(row+1)*h);             }       }     public boolean mouseEnter(Event evt, int x, int y)       { curs.setCursor(thread==null? Frame.CROSSHAIR_CURSOR:                                      Frame.HAND_CURSOR);         return true;       }     public boolean mouseExit(Event evt, int x, int y)       { curs.setCursor(Frame.DEFAULT_CURSOR);         return true;       }     public boolean mouseMove(Event evt, int x, int y)       { if (thread==null)           { if (curs.getCursorType()!=Frame.CROSSHAIR_CURSOR)               curs.setCursor(Frame.CROSSHAIR_CURSOR);           }         return true;       }     public boolean mouseDown(Event evt, int x, int y)       { if (thread!=null)           { stopAnimation();             curs.setCursor(Frame.CROSSHAIR_CURSOR);             updateInfo("Simulazione interrotta");           }         return true;       }     public synchronized void reset(Settings settings)       { stopAnimation();         this.settings=settings;         simulation=null;         time=0;         recomputeWindow();         repaintBackground();         repaint(300);       }     public synchronized void play(Simulation simul)       { stopAnimation();         simulation=simul;         time=0;         removeSprites();         int i;         for(i=0; i<simul.getMolNumber(); i++)           addSprite(ball);         recomputeWindow();         repaintBackground();       }    Point realToPixel(double x, double y)      { return map.realToPixel(x, y);      }    void pixelToReal(int ix, int iy, double coords[])      { map.pixelToReal(ix, iy, coords);      }          void updateInfo(String s)      { if (status!=null)          status.showStatus(s);      }    public void repaint()      { super.repaint();        legenda.repaint();      }    public void updateBeforeResize()      { Dimension d=size();        Insets insets=new Insets(0,0,0,0);        insets.top=15;        insets.left=15;        insets.bottom=15;        insets.right=15;        map.set(d, insets);        if (simulation!=null)          { int m;            for(m=0; m<simulation.getMolNumber(); m++)              { Point pt=getBallPos(m);                moveSprite(m, pt.x, pt.y);              }          }      }    public void paintBackground(Graphics g, Rectangle clip)      { super.paintBackground(g, clip);        if (simulation==null)          return;        double w=simulation.getHorizontalSide();        double h=simulation.getVerticalSide();        Point pta=realToPixel(0, h);        Point ptb=realToPixel(w, 0);        g.setColor(Color.blue);        g.drawRect(pta.x-ball_width/2, pta.y-ball_height/2,                   ptb.x-pta.x+ball_width, ptb.y-pta.y+ball_height);        paintLines(g, clip, 0);      }    public void paintLines(Graphics g, Rectangle clip, double initTime)      { g.setColor(Color.green);        int m;        for(m=0; m<simulation.getMolNumber(); m++)          { int s, sn=simulation.getSegmentNumber(m);            int s0=simulation.findSegment(m, initTime);            if (s0<0)              continue;            Point pt1=new Point(0,0), pt2;            double x1=0, y1=0;loop:       for(s=s0; s<sn; s++)              {                 double t0=simulation.getSegmentT0(m,s);                if (t0>=time)                  break loop;                if (s==s0)                  { x1=simulation.getSegmentX0(m, s);                    y1=simulation.getSegmentY0(m, s);                    pt1=realToPixel(x1,y1);                  }                double dur=simulation.getSegmentDuration(m,s);                double dir=simulation.getSegmentDirection(m,s);                double sin=Math.sin(dir);                double cos=Math.cos(dir);                double len=simulation.getSegmentLength(m,s);                if (t0+dur>time)                  len*= (time-t0)/dur;                double x2=x1+len*cos;                double y2=y1+len*sin;                pt2=realToPixel(x2, y2);                g.drawLine(pt1.x, pt1.y, pt2.x, pt2.y);                pt1=pt2;                x1=x2;                y1=y2;              }          }      }    void recomputeWindow()      { if (simulation==null)          { win_x1=-3;            win_x2=3;            win_y1=-3;            win_y2=3;          }        else          { double w=simulation.getHorizontalSide();            double h=simulation.getVerticalSide();            win_x1=-w/20;            win_x2=w+w/20;            win_y1=-h/20;            win_y2=h+h/20;          }        map.set(win_x1, win_y1, win_x2, win_y2);        updateBeforeResize();      }    /**     * Compute the current position of the ball m     */    Point getBallPos(int m)      { if (simulation==null)          return new Point(0, 0);        int s=simulation.findSegment(m, time);        if (s<0)          return new Point(0, 0);        double t0=simulation.getSegmentT0(m,s);        double x1=simulation.getSegmentX0(m, s);        double y1=simulation.getSegmentY0(m, s);        double dur=simulation.getSegmentDuration(m,s);        double dir=simulation.getSegmentDirection(m,s);        double sin=Math.sin(dir);        double cos=Math.cos(dir);        double len=simulation.getSegmentLength(m,s);        if (t0+dur>time)          len*= (time-t0)/dur;        double x2=x1+len*cos;        double y2=y1+len*sin;        Point pt=realToPixel(x2, y2);        pt.x-=ball_width/2;        pt.y-=ball_height/2;        return pt;      }  }
+package gas;
+
+import ui.*;
+import numeric.*;
+import util.*;
+import java.awt.*;
+
+
+/**
+ * The canvas used to display the simulation (actually a panel)
+ * @author Pasquale Foggia
+ * @version 0.90, Dec 1997
+ */
+public class SimulationDisplay extends SpriteCanvas 
+                               implements Runnable, Painter
+  {  double win_x1, win_y1, win_x2, win_y2;
+     CursorChanger curs;
+     Thread thread=null;
+     StatusDisplayer status;
+     Settings settings;
+     Simulation simulation;
+     static final double frameDelay=1.0/10;
+     Image ball;
+     int ball_width, ball_height;
+     static final double log10=Math.log(10);
+     CoordinateMapper map;
+     PaintableCanvas legenda;
+     double time;
+
+
+     public SimulationDisplay(Settings settings, PaintableCanvas legenda,
+                              StatusDisplayer status)
+       { setDelayedMode(true);
+         this.legenda=legenda;
+         legenda.setPainter(this);
+         this.status=status;
+         this.settings=settings;
+         simulation=null;
+         curs=new CursorChanger(this);
+         curs.setCursor(Frame.CROSSHAIR_CURSOR);
+         setBackground(Color.white);
+         ball=UserInterface.getImageLoader().load("icons/red-ball.gif");
+         ball_width=ball.getWidth(this);
+         ball_height=ball.getHeight(this);
+         map=new CoordinateMapper();
+         map.setIsometric(true);
+         recomputeWindow();
+       }
+
+
+     public synchronized void startAnimation()
+       { stopAnimation();
+         thread=new Thread(this);
+         thread.start();
+         
+       }
+
+     public synchronized void stopAnimation()
+       { if (thread!=null)
+           { thread.stop();
+           }
+         thread=null;
+       }
+
+
+     public void run()
+       { recomputeWindow();
+         time=0;
+         updateBeforeResize();
+         repaintBackground();
+
+         double maxTime=simulation.getTotalDuration();
+         double dt=frameDelay/30*maxTime;
+         int mol=simulation.getMolNumber();
+         int i;
+         for(i=0; i<mol; i++)
+           showSprite(i, true);
+         nextFrame();
+         long millis=System.currentTimeMillis();
+         Graphics g=getBackgroundGraphics();
+         Rectangle clip=new Rectangle(0,0,dim.width, dim.height);
+         
+         while (time<=maxTime)
+           { 
+             millis+=(long)(frameDelay*1000);
+             if (millis>=System.currentTimeMillis())
+               { // paintLines(g, clip, time-2*dt);
+                 paintBackground();
+                 int m;
+                 for(m=0; m<mol; m++)
+                   { Point pt=getBallPos(m);
+                     moveSprite(m, pt.x, pt.y);
+                   }
+                 nextFrame(millis);
+               }
+             time+=dt;
+           }
+
+         updateBeforeResize();
+
+       }
+
+
+     /**
+      * Paint the legenda
+      */
+     public void paint(Component com, Graphics g)
+       { if (simulation==null)
+           return;
+         Dimension d=com.size();
+         FontMetrics fm=g.getFontMetrics();
+         int h=fm.getHeight();
+         int asc=fm.getAscent();
+
+         String title="";
+         String txt[][]= { {"",""}, {"",""}, {"",""}, {"",""} };
+         double vms=simulation.getMeasuredVms();
+         if (settings.tipo==Settings.MOTO_BROWNIANO)
+           { title="Moto Browniano";
+             txt[0][1]="Temp. istantanea "+
+                 Format.format(".1", simulation.getTempFromVms(vms))+" °K";
+             txt[1][0]="Vel. quad. media "+
+                 Format.format(".3", simulation.getExpectedVelocity())+" m/s";
+             txt[1][1]="Vel. q. m. osservata "+
+                  Format.format(".3", Math.sqrt(vms))+" m/s";
+             txt[2][0]="Cammino libero medio "+
+                 Format.format_e(".3", simulation.getExpectedFreePath())+" m";
+             txt[2][1]="Camm. medio osservato "+
+                  Format.format_e(".3", simulation.getMeasuredPath())+" m";
+             txt[3][0]="Urti tra molecole "+simulation.getMolHits();
+             txt[3][1]="Urti con pareti "+simulation.getSideHits();
+           }
+         else if (settings.tipo==Settings.MOTO_NMOLECOLE)
+           { title="Moto di n molecole";
+             txt[0][0]="Press. istantanea "+
+                 Format.format_e(".3", simulation.getPressFromVms(vms))+" Pa";
+             txt[0][1]="Temp. istantanea "+
+                 Format.format(".1", simulation.getTempFromVms(vms))+" °K";
+             txt[1][0]="Vel. quad. media "+
+                 Format.format(".3", simulation.getExpectedVelocity())+" m/s";
+             txt[1][1]="Vel. q. m. osservata "+
+                  Format.format(".3", Math.sqrt(vms))+" m/s";
+             txt[2][0]="Vel. più probabile "+
+                 Format.format(".3", simulation.getModalVelocity())+" m/s";
+             txt[2][1]="Urti con pareti "+simulation.getSideHits();
+           }
+
+         int w=fm.stringWidth(title);
+         g.setColor(Color.lightGray);
+         g.drawString(title, (d.width-w)/2+1, asc+3+1);
+         g.setColor(Color.blue);
+         g.drawString(title, (d.width-w)/2-2, asc+3-2);
+
+         g.setColor(Color.black); 
+         int row, col;
+         for(row=0; row<4; row++)
+           for(col=0; col<2; col++)
+             { g.drawString(txt[row][col], 10+col*(d.width/2),
+                                           3+asc+(row+1)*h);
+             }
+
+       }
+
+
+     public boolean mouseEnter(Event evt, int x, int y)
+       { curs.setCursor(thread==null? Frame.CROSSHAIR_CURSOR: 
+                                     Frame.HAND_CURSOR);
+         return true;
+       }
+
+     public boolean mouseExit(Event evt, int x, int y)
+       { curs.setCursor(Frame.DEFAULT_CURSOR);
+         return true;
+       }
+
+     public boolean mouseMove(Event evt, int x, int y)
+       { if (thread==null)
+           { if (curs.getCursorType()!=Frame.CROSSHAIR_CURSOR)
+               curs.setCursor(Frame.CROSSHAIR_CURSOR);
+
+           }
+         return true;
+       }
+
+     public boolean mouseDown(Event evt, int x, int y)
+       { if (thread!=null)
+           { stopAnimation();
+             curs.setCursor(Frame.CROSSHAIR_CURSOR);
+             updateInfo("Simulazione interrotta");
+           }
+
+         return true;
+       }
+
+     public synchronized void reset(Settings settings)
+       { stopAnimation();
+         this.settings=settings;
+         simulation=null;
+         time=0;
+         recomputeWindow();
+         repaintBackground();
+         repaint(300);
+       }
+
+     public synchronized void play(Simulation simul)
+       { stopAnimation();
+         simulation=simul;
+         time=0;
+         removeSprites();
+         int i;
+         for(i=0; i<simul.getMolNumber(); i++)
+           addSprite(ball);
+         recomputeWindow();
+         repaintBackground();
+       }
+
+
+    Point realToPixel(double x, double y)
+      { return map.realToPixel(x, y);
+      }
+
+
+    void pixelToReal(int ix, int iy, double coords[])
+      { map.pixelToReal(ix, iy, coords);
+      }      
+
+    void updateInfo(String s)
+      { if (status!=null)
+          status.showStatus(s);
+      }
+
+    public void repaint()
+      { super.repaint();
+        legenda.repaint();
+      }
+
+
+    public void updateBeforeResize()
+      { Dimension d=size();
+        Insets insets=new Insets(0,0,0,0);
+        insets.top=15;
+        insets.left=15;
+        insets.bottom=15;
+        insets.right=15;
+        map.set(d, insets);
+        if (simulation!=null)
+          { int m;
+            for(m=0; m<simulation.getMolNumber(); m++)
+              { Point pt=getBallPos(m);
+                moveSprite(m, pt.x, pt.y);
+              }
+          }
+      }
+
+
+    public void paintBackground(Graphics g, Rectangle clip)
+      { super.paintBackground(g, clip);
+        if (simulation==null)
+          return;
+
+        double w=simulation.getHorizontalSide();
+        double h=simulation.getVerticalSide();
+        Point pta=realToPixel(0, h);
+        Point ptb=realToPixel(w, 0);
+
+        g.setColor(Color.blue);
+        g.drawRect(pta.x-ball_width/2, pta.y-ball_height/2,
+                   ptb.x-pta.x+ball_width, ptb.y-pta.y+ball_height);
+        paintLines(g, clip, 0);
+      }
+
+    public void paintLines(Graphics g, Rectangle clip, double initTime)
+      { g.setColor(Color.green);
+        int m;
+        for(m=0; m<simulation.getMolNumber(); m++)
+          { int s, sn=simulation.getSegmentNumber(m);
+            int s0=simulation.findSegment(m, initTime);
+
+            if (s0<0)
+              continue;
+
+            Point pt1=new Point(0,0), pt2;
+            double x1=0, y1=0;
+loop:       for(s=s0; s<sn; s++)
+              { 
+                double t0=simulation.getSegmentT0(m,s);
+                if (t0>=time)
+                  break loop;
+                if (s==s0)
+                  { x1=simulation.getSegmentX0(m, s);
+                    y1=simulation.getSegmentY0(m, s);
+                    pt1=realToPixel(x1,y1);
+                  }
+                double dur=simulation.getSegmentDuration(m,s);
+                double dir=simulation.getSegmentDirection(m,s);
+                double sin=Math.sin(dir);
+                double cos=Math.cos(dir);
+                double len=simulation.getSegmentLength(m,s);
+                if (t0+dur>time)
+                  len*= (time-t0)/dur;
+                double x2=x1+len*cos;
+                double y2=y1+len*sin;
+                pt2=realToPixel(x2, y2);
+                g.drawLine(pt1.x, pt1.y, pt2.x, pt2.y);
+                pt1=pt2;
+                x1=x2;
+                y1=y2;
+              }
+          }
+
+
+      }
+
+
+
+    void recomputeWindow()
+      { if (simulation==null)
+          { win_x1=-3;
+            win_x2=3;
+            win_y1=-3;
+            win_y2=3;
+          }
+        else
+          { double w=simulation.getHorizontalSide();
+            double h=simulation.getVerticalSide();
+            win_x1=-w/20;
+            win_x2=w+w/20;
+            win_y1=-h/20;
+            win_y2=h+h/20;
+          }
+        map.set(win_x1, win_y1, win_x2, win_y2);
+
+        updateBeforeResize();
+      }
+
+    /**
+     * Compute the current position of the ball m
+     */
+    Point getBallPos(int m)
+      { if (simulation==null)
+          return new Point(0, 0);
+        int s=simulation.findSegment(m, time);
+        if (s<0)
+          return new Point(0, 0);
+
+        double t0=simulation.getSegmentT0(m,s);
+        double x1=simulation.getSegmentX0(m, s);
+        double y1=simulation.getSegmentY0(m, s);
+        double dur=simulation.getSegmentDuration(m,s);
+        double dir=simulation.getSegmentDirection(m,s);
+        double sin=Math.sin(dir);
+        double cos=Math.cos(dir);
+        double len=simulation.getSegmentLength(m,s);
+        if (t0+dur>time)
+          len*= (time-t0)/dur;
+        double x2=x1+len*cos;
+        double y2=y1+len*sin;
+        Point pt=realToPixel(x2, y2);
+        pt.x-=ball_width/2;
+        pt.y-=ball_height/2;
+
+        return pt;
+
+      }
+
+
+
+
+  }

@@ -1,1 +1,74 @@
-package dinam1;import ui.*;import util.*;import dinam1.*;import java.awt.*;/** * A canvas displaying a graph of the simulation * relative motion */public class RelGraphic extends GraphicDisplay  {     // Moto traslatorio unif. accelerato    public void setData(Simulation sim, double vx, double vy,                                         double ax, double ay)      { double x[], y[];        double t, t0;        int n=sim.getStepCount();        x=new double[n];        y=new double[n];        if (n==0)          t0=0;        else           t0=sim.getTime(0);        int i;        for(i=0; i<n; i++)          { t=sim.getTime(i)-t0;            x[i]=sim.getX(i)+vx*t+0.5*ax*t*t;            y[i]=sim.getY(i)+vy*t+0.5*ay*t*t;          }        setData(x, "X[m]", y, "Y[m]");      }    // Moto rotatorio unif. accelerato    public void setData(Simulation sim, double v, double a)       { double x[], y[];        double t, t0;        int n=sim.getStepCount();        x=new double[n];        y=new double[n];        if (n==0)          t0=0;        else           t0=sim.getTime(0);        int i;        for(i=0; i<n; i++)          { t=sim.getTime(i)-t0;            double ang=v*t+0.5*a*t*t;            double sin=Math.sin(ang);            double cos=Math.cos(ang);            double xx=sim.getX(i);            double yy=sim.getY(i);            x[i]=xx*cos-yy*sin;            y[i]=xx*sin+yy*cos;          }        setData(x, "X[m]", y, "Y[m]");      }  }
+package dinam1;
+
+import ui.*;
+import util.*;
+import dinam1.*;
+import java.awt.*;
+
+/**
+ * A canvas displaying a graph of the simulation
+ * relative motion
+ */
+public class RelGraphic extends GraphicDisplay
+  { 
+
+    // Moto traslatorio unif. accelerato
+    public void setData(Simulation sim, double vx, double vy, 
+                                        double ax, double ay)
+      { double x[], y[];
+        double t, t0;
+
+        int n=sim.getStepCount();
+
+        x=new double[n];
+        y=new double[n];
+
+        if (n==0)
+          t0=0;
+        else 
+          t0=sim.getTime(0);
+
+        int i;
+        for(i=0; i<n; i++)
+          { t=sim.getTime(i)-t0;
+            x[i]=sim.getX(i)+vx*t+0.5*ax*t*t;
+            y[i]=sim.getY(i)+vy*t+0.5*ay*t*t;
+          }
+
+        setData(x, "X[m]", y, "Y[m]");
+
+      }
+
+    // Moto rotatorio unif. accelerato
+    public void setData(Simulation sim, double v, double a) 
+      { double x[], y[];
+        double t, t0;
+
+        int n=sim.getStepCount();
+
+        x=new double[n];
+        y=new double[n];
+
+        if (n==0)
+          t0=0;
+        else 
+          t0=sim.getTime(0);
+
+        int i;
+        for(i=0; i<n; i++)
+          { t=sim.getTime(i)-t0;
+            double ang=v*t+0.5*a*t*t;
+            double sin=Math.sin(ang);
+            double cos=Math.cos(ang);
+
+            double xx=sim.getX(i);
+            double yy=sim.getY(i);
+            x[i]=xx*cos-yy*sin;
+            y[i]=xx*sin+yy*cos;
+          }
+
+        setData(x, "X[m]", y, "Y[m]");
+
+      }
+
+  }

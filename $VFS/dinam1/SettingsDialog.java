@@ -1,1 +1,255 @@
-package dinam1;import ui.*;import java.awt.*;import dinam1.*;/** * A dialog box to input new settings */public class SettingsDialog extends TrackedDialog  {     Component target;    Settings initial;    HelpDisplayer help;    static Font font_small=new Font("TimesRoman", Font.PLAIN, 12);    static Font font_medium=new Font("TimesRoman", Font.PLAIN, 14);    static Font font_large=new Font("TimesRoman", Font.BOLD, 16);    TabsPanel tabs;    NewVectorInput forza;    CheckboxGroup cbg;    Checkbox cb[];    NumericInput angolo, raggio;    NumericInput attr, res_lam, res_turb;    Panel cards_panel;    CardLayout cards;    /**     * Create a new settings dialog. If the user confirms     * the changes, the target component will be notified with     * an action event having a Settings object as the argument     */    public SettingsDialog(Component target, Settings initial)      { super(UserInterface.getDummyFrame(),               "Impostazione dei parametri", true);        this.target=target;        this.initial=initial;        help=UserInterface.getHelpDisplayer();        // setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));        setLayout(new BorderLayout());                //        // Crea la barra di bottoni in alto        //        tabs=new TabsPanel();        tabs.setFont(font_small);        tabs.add("Campo di forza");        tabs.add("Tipo di vincolo");        tabs.add("Attrito e resistenza del mezzo");        add("North", tabs);        cards_panel=new Panel();        cards=new CardLayout();        cards_panel.setLayout(cards);        //        // Crea il pannello con l'input della forza        //        Panel forza_panel=new Panel();        forza_panel.setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));        Label lab=new Label("Campo di forza [N]");        lab.setFont(font_large);        forza_panel.add("", lab);        forza=new NewVectorInput(-40, 40, -40, 40, 100);        forza.setValue(initial.fx, initial.fy);        forza_panel.add("", forza);        cards_panel.add("Forza", forza_panel);        //        // Crea il pannello con l'input del tipo di vincolo        //        Panel tipo_panel=new Panel();        tipo_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));        lab=new Label("Tipo di vincolo");        lab.setFont(font_large);        tipo_panel.add("", lab);        cbg=new CheckboxGroup();        cb=new Checkbox[Settings.TIPI_DI_VINCOLO];        cb[Settings.NESSUNO]=new Checkbox("Nessuno", cbg, false);        tipo_panel.add("", cb[Settings.NESSUNO]);        cb[Settings.PIANO]=new Checkbox("Piano", cbg, false);        tipo_panel.add("", cb[Settings.PIANO]);        cb[Settings.CIRCONFERENZA]=new Checkbox("Circonferenza", cbg, false);        tipo_panel.add("", cb[Settings.CIRCONFERENZA]);        int i;        for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)          cb[i].setFont(font_medium);                lab=new Label("Angolo del piano [gradi]");        lab.setFont(font_medium);        tipo_panel.add("", lab);        angolo=new NumericInput(-18, 18, 0, 5);        angolo.setValue(initial.angolo);        tipo_panel.add("", angolo);                lab=new Label("Raggio della circonferenza [m]");        lab.setFont(font_medium);        tipo_panel.add("", lab);        raggio=new NumericInput(1, 50, 1, 0.1);        raggio.setValue(initial.raggio);        tipo_panel.add("", raggio);        cards_panel.add("Tipo", tipo_panel);                       //        // Crea il pannello con l'input delle forze di attrito        //        Panel attr_panel=new Panel();        attr_panel.setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));        lab=new Label("Attrito e resistenza del mezzo");        lab.setFont(font_large);        attr_panel.add("", lab);        lab=new Label("Attrito");        lab.setFont(font_medium);        attr_panel.add("", lab);        attr=new NumericInput(0, 400, 0, 0.01);        attr.setValue(initial.attrito_coulombiano);        attr_panel.add("", attr);        lab=new Label("Resistenza in regime laminare [N*s/m]");        lab.setFont(font_medium);        attr_panel.add("", lab);        res_lam=new NumericInput(0, 400, 0, 0.01);        res_lam.setValue(initial.resistenza_laminare);        attr_panel.add("", res_lam);        lab=new Label("Resistenza in regime turbolento [N*s^2/m^2]");        lab.setFont(font_medium);        attr_panel.add("", lab);        res_turb=new NumericInput(0, 400, 0, 0.01);        res_turb.setValue(initial.resistenza_turbolenta);        attr_panel.add("", res_turb);                cards_panel.add("Attrito", attr_panel);        // add("", cards_panel);        add("Center", cards_panel);        //        // Crea la barra di bottoni in basso        //        ImageLoader il=UserInterface.getImageLoader();        Panel confirm_panel=new Panel();        confirm_panel.setFont(font_large);        confirm_panel.setLayout(new FlowLayout(FlowLayout.LEFT));        confirm_panel.add("", new ImageButton3D("OK",                                   il.load("icons/ok.gif")));        confirm_panel.add("", new ImageButton3D("Annulla",                                   il.load("icons/cancel.gif")));        confirm_panel.add("", new ImageButton3D("Aiuto",                                   il.load("icons/help.gif")));        // add("", confirm_panel);        add("South", confirm_panel);        impostaVincolo(cb[initial.vincolo]);      }    void impostaVincolo(Checkbox sel)      { int i;        for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)          { if (cb[i]!=sel)              cb[i].setState(false);          }        sel.setState(true);        angolo.enable( sel == cb[Settings.PIANO] );        raggio.enable( sel == cb[Settings.CIRCONFERENZA] );        attr.enable( sel != cb[Settings.NESSUNO] );      }    public boolean action(Event evt, Object what)      { if ("OK".equals(what))          { dispose();            Settings settings=new Settings();            settings.fx=forza.getX();            settings.fy=forza.getY();            Checkbox curr=cbg.getCurrent();            int i;            for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)              if (curr==cb[i])                settings.vincolo=i;            settings.attrito_coulombiano=attr.getValue();            settings.resistenza_laminare=res_lam.getValue();            settings.resistenza_turbolenta=res_turb.getValue();            settings.angolo=(int)angolo.getValue();            settings.raggio=raggio.getValue();            target.deliverEvent(new Event(target, Event.ACTION_EVENT, settings));          }        else if ("Annulla".equals(what))          { dispose();          }        else if ("Aiuto".equals(what))          { help.displayHelp("help/dinam1", "param");          }        else if ("Campo di forza".equals(what))          { cards.show(cards_panel, "Forza");            tabs.show("Campo di forza");             validate();          }        else if ("Tipo di vincolo".equals(what))          { cards.show(cards_panel, "Tipo");            tabs.show("Tipo di vincolo");             validate();          }        else if ("Attrito e resistenza del mezzo".equals(what))          { cards.show(cards_panel, "Attrito");            tabs.show("Attrito e resistenza del mezzo");             validate();          }        else if (evt.target instanceof Checkbox)          { impostaVincolo(cbg.getCurrent());          }               return true;      }    public boolean handleEvent(Event evt)      { if (evt.id == Event.WINDOW_DESTROY)         { dispose();}         else if (evt.target==res_lam){                                      if (res_lam.getValue()!=0){res_turb.setValue(0);}                                     }         else if (evt.target==res_turb){                                       if (res_turb.getValue()!=0){res_lam.setValue(0);}                                      }        return super.handleEvent(evt);      }  }
+package dinam1;
+
+import ui.*;
+import java.awt.*;
+import dinam1.*;
+
+
+/**
+ * A dialog box to input new settings
+ */
+public class SettingsDialog extends TrackedDialog
+  { 
+    Component target;
+    Settings initial;
+    HelpDisplayer help;
+    static Font font_small=new Font("TimesRoman", Font.PLAIN, 12);
+    static Font font_medium=new Font("TimesRoman", Font.PLAIN, 14);
+    static Font font_large=new Font("TimesRoman", Font.BOLD, 16);
+
+    TabsPanel tabs;
+    NewVectorInput forza;
+    CheckboxGroup cbg;
+    Checkbox cb[];
+    NumericInput angolo, raggio;
+    NumericInput attr, res_lam, res_turb;
+
+    Panel cards_panel;
+    CardLayout cards;
+
+
+    /**
+     * Create a new settings dialog. If the user confirms
+     * the changes, the target component will be notified with
+     * an action event having a Settings object as the argument
+     */
+    public SettingsDialog(Component target, Settings initial)
+      { super(UserInterface.getDummyFrame(), 
+              "Impostazione dei parametri", true);
+
+        this.target=target;
+        this.initial=initial;
+        help=UserInterface.getHelpDisplayer();
+
+        // setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));
+        setLayout(new BorderLayout());
+
+        
+        //
+        // Crea la barra di bottoni in alto
+        //
+
+        tabs=new TabsPanel();
+        tabs.setFont(font_small);
+        tabs.add("Campo di forza");
+        tabs.add("Tipo di vincolo");
+        tabs.add("Attrito e resistenza del mezzo");
+        add("North", tabs);
+
+
+        cards_panel=new Panel();
+        cards=new CardLayout();
+        cards_panel.setLayout(cards);
+
+        //
+        // Crea il pannello con l'input della forza
+        //
+
+        Panel forza_panel=new Panel();
+        forza_panel.setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));
+        Label lab=new Label("Campo di forza [N]");
+        lab.setFont(font_large);
+        forza_panel.add("", lab);
+
+        forza=new NewVectorInput(-40, 40, -40, 40, 100);
+        forza.setValue(initial.fx, initial.fy);
+        forza_panel.add("", forza);
+
+        cards_panel.add("Forza", forza_panel);
+
+        //
+        // Crea il pannello con l'input del tipo di vincolo
+        //
+
+        Panel tipo_panel=new Panel();
+        tipo_panel.setLayout(new VerticalLayout(VerticalLayout.LEFT));
+        lab=new Label("Tipo di vincolo");
+        lab.setFont(font_large);
+        tipo_panel.add("", lab);
+
+        cbg=new CheckboxGroup();
+        cb=new Checkbox[Settings.TIPI_DI_VINCOLO];
+
+        cb[Settings.NESSUNO]=new Checkbox("Nessuno", cbg, false);
+        tipo_panel.add("", cb[Settings.NESSUNO]);
+        cb[Settings.PIANO]=new Checkbox("Piano", cbg, false);
+        tipo_panel.add("", cb[Settings.PIANO]);
+        cb[Settings.CIRCONFERENZA]=new Checkbox("Circonferenza", cbg, false);
+        tipo_panel.add("", cb[Settings.CIRCONFERENZA]);
+        int i;
+        for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)
+          cb[i].setFont(font_medium);
+        
+        lab=new Label("Angolo del piano [gradi]");
+        lab.setFont(font_medium);
+        tipo_panel.add("", lab);
+        angolo=new NumericInput(-18, 18, 0, 5);
+        angolo.setValue(initial.angolo);
+        tipo_panel.add("", angolo);
+        
+        lab=new Label("Raggio della circonferenza [m]");
+        lab.setFont(font_medium);
+        tipo_panel.add("", lab);
+        raggio=new NumericInput(1, 50, 1, 0.1);
+        raggio.setValue(initial.raggio);
+        tipo_panel.add("", raggio);
+
+        cards_panel.add("Tipo", tipo_panel);
+       
+        
+        //
+        // Crea il pannello con l'input delle forze di attrito
+        //
+        Panel attr_panel=new Panel();
+        attr_panel.setLayout(new VerticalLayout(VerticalLayout.JUSTIFIED));
+        lab=new Label("Attrito e resistenza del mezzo");
+        lab.setFont(font_large);
+        attr_panel.add("", lab);
+
+        lab=new Label("Attrito");
+        lab.setFont(font_medium);
+        attr_panel.add("", lab);
+        attr=new NumericInput(0, 400, 0, 0.01);
+        attr.setValue(initial.attrito_coulombiano);
+        attr_panel.add("", attr);
+
+        lab=new Label("Resistenza in regime laminare [N*s/m]");
+        lab.setFont(font_medium);
+        attr_panel.add("", lab);
+        res_lam=new NumericInput(0, 400, 0, 0.01);
+        res_lam.setValue(initial.resistenza_laminare);
+        attr_panel.add("", res_lam);
+
+        lab=new Label("Resistenza in regime turbolento [N*s^2/m^2]");
+        lab.setFont(font_medium);
+        attr_panel.add("", lab);
+        res_turb=new NumericInput(0, 400, 0, 0.01);
+        res_turb.setValue(initial.resistenza_turbolenta);
+        attr_panel.add("", res_turb);
+
+        
+        cards_panel.add("Attrito", attr_panel);
+
+        // add("", cards_panel);
+        add("Center", cards_panel);
+
+
+        //
+        // Crea la barra di bottoni in basso
+        //
+        ImageLoader il=UserInterface.getImageLoader();
+        Panel confirm_panel=new Panel();
+        confirm_panel.setFont(font_large);
+        confirm_panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        confirm_panel.add("", new ImageButton3D("OK",
+                                   il.load("icons/ok.gif")));
+        confirm_panel.add("", new ImageButton3D("Annulla",
+                                   il.load("icons/cancel.gif")));
+        confirm_panel.add("", new ImageButton3D("Aiuto",
+                                   il.load("icons/help.gif")));
+        // add("", confirm_panel);
+        add("South", confirm_panel);
+
+
+        impostaVincolo(cb[initial.vincolo]);
+      }
+
+
+    void impostaVincolo(Checkbox sel)
+      { int i;
+
+        for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)
+          { if (cb[i]!=sel)
+              cb[i].setState(false);
+          }
+        sel.setState(true);
+
+        angolo.enable( sel == cb[Settings.PIANO] );
+        raggio.enable( sel == cb[Settings.CIRCONFERENZA] );
+        attr.enable( sel != cb[Settings.NESSUNO] );
+      }
+
+
+
+    public boolean action(Event evt, Object what)
+      { if ("OK".equals(what))
+          { dispose();
+            Settings settings=new Settings();
+            settings.fx=forza.getX();
+            settings.fy=forza.getY();
+            Checkbox curr=cbg.getCurrent();
+            int i;
+            for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)
+              if (curr==cb[i])
+                settings.vincolo=i;
+            settings.attrito_coulombiano=attr.getValue();
+            settings.resistenza_laminare=res_lam.getValue();
+            settings.resistenza_turbolenta=res_turb.getValue();
+            settings.angolo=(int)angolo.getValue();
+            settings.raggio=raggio.getValue();
+
+            target.deliverEvent(new Event(target, Event.ACTION_EVENT, settings));
+          }
+        else if ("Annulla".equals(what))
+          { dispose();
+          }
+        else if ("Aiuto".equals(what))
+          { help.displayHelp("help/dinam1", "param");
+          }
+        else if ("Campo di forza".equals(what))
+          { cards.show(cards_panel, "Forza");
+            tabs.show("Campo di forza");
+             validate();
+          }
+        else if ("Tipo di vincolo".equals(what))
+          { cards.show(cards_panel, "Tipo");
+            tabs.show("Tipo di vincolo");
+             validate();
+          }
+        else if ("Attrito e resistenza del mezzo".equals(what))
+          { cards.show(cards_panel, "Attrito");
+            tabs.show("Attrito e resistenza del mezzo");
+             validate();
+          }
+        else if (evt.target instanceof Checkbox)
+          { impostaVincolo(cbg.getCurrent());
+          }
+       
+
+        return true;
+      }
+
+    public boolean handleEvent(Event evt)
+      { if (evt.id == Event.WINDOW_DESTROY)
+         { dispose();}
+         else if (evt.target==res_lam){
+                                      if (res_lam.getValue()!=0){res_turb.setValue(0);}
+                                     }
+         else if (evt.target==res_turb){
+                                       if (res_turb.getValue()!=0){res_lam.setValue(0);}
+                                      }
+
+        return super.handleEvent(evt);
+      }
+
+  }

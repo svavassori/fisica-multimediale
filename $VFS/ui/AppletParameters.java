@@ -1,1 +1,19 @@
-package ui;import java.applet.*;/** * Give access to the parameters of the applet (<PARAM> tags) * through a Parameters object */public class AppletParameters extends Parameters  { Applet applet;    public AppletParameters(Applet applet)      { this.applet=applet;      }    protected String getParameter(String name)      { return applet.getParameter(name);      }  }
+package ui;
+
+import java.applet.*;
+
+/**
+ * Give access to the parameters of the applet (<PARAM> tags)
+ * through a Parameters object
+ */
+public class AppletParameters extends Parameters
+  { Applet applet;
+
+    public AppletParameters(Applet applet)
+      { this.applet=applet;
+      }
+
+    protected String getParameter(String name)
+      { return applet.getParameter(name);
+      }
+  }

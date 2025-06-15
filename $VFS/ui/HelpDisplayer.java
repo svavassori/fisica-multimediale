@@ -1,1 +1,15 @@
-package ui;/** * Interface of generic help displayer. */public interface HelpDisplayer  {     /**     * Shows an help page for a given topic/item pair     * The interpretation of topic/item is dependent on the     * implementation     */    void displayHelp(String topic, String item);  }
+package ui;
+
+/**
+ * Interface of generic help displayer.
+ */
+public interface HelpDisplayer
+  { 
+    /**
+     * Shows an help page for a given topic/item pair
+     * The interpretation of topic/item is dependent on the
+     * implementation
+     */
+    void displayHelp(String topic, String item);
+
+  }
