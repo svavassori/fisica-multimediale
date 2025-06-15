@@ -1,0 +1,1 @@
+package cinemat;/** * This class contains the options for the simulation */public class Options  {     double duration=20.0;  // in sec.    double stepDuration=2.0; // in sec.    double timeWarp=1.0;  // Rapp. tempo simulato/tempo reale  }

@@ -1,0 +1,1 @@
+package ui;/** * An empty parameter set. */public class NoParameters extends Parameters  { protected String getParameter(String name)      { return null;      }  }

@@ -1,0 +1,1 @@
+package circuiti;import java.awt.*;/** * Un corto circuito */public class CortoCircuito extends Componente  { public String toString()      { return "corto circuito";      }    public void paint(Graphics g, int x1, int y1, int x2, int y2)      { g.setColor(Color.black);        g.drawLine(x1, y1, x2, y2);        paintOrientation(g, x1, y1, x2, y2);      }  }

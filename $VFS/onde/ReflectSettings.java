@@ -1,0 +1,1 @@
+package onde;/** * Impostazioni per la riflessione */public class ReflectSettings  { public int onda=0;    public int angolo=45;  }

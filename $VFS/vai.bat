@@ -1,0 +1,1 @@
+cd dinam1javac Dinam1.javacd ..cd dinam2javac Dinam2.javacd ..
