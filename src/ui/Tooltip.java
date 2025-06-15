@@ -12,7 +12,7 @@ public class Tooltip extends Window
 
     static 
       { frame=new Frame();
-        if (frame.getPeer()==null)
+        if (!frame.isDisplayable())
           frame.addNotify();
       }
 

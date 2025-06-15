@@ -109,16 +109,17 @@ public class PropConstraint
         if (other!=null)
           { Point l=other.location();
             Dimension d=other.size();
-            if (minimum)
-              { ComponentPeer pee=other.getPeer();
-                if (pee!=null)
-                  { Dimension md=pee.getMinimumSize();
-                    if (d.width<md.width)
-                      d.width=md.width;
-                    if (d.height<md.height)
-                      d.height=md.height;
-                  }
-               }
+            // TODO 'minimum' seems always set to false
+//            if (minimum)
+//              { ComponentPeer pee=other.getPeer();
+//                if (pee!=null)
+//                  { Dimension md=pee.getMinimumSize();
+//                    if (d.width<md.width)
+//                      d.width=md.width;
+//                    if (d.height<md.height)
+//                      d.height=md.height;
+//                  }
+//               }
                 
             int v;
 

@@ -125,15 +125,16 @@ public class PropConstraints
         Point l=com.location();
         int res[]=new int[2];
 
-        ComponentPeer cp=com.getPeer();
-        if (cp!=null)
-          { Dimension dd=cp.getMinimumSize();
-            if (d.width<dd.width)
-              d.width=dd.width;
-            if (d.height<dd.height)
-              d.height=dd.height;
-
-          }
+        // TODO Component peer should not be used
+//        ComponentPeer cp=com.getPeer();
+//        if (cp!=null)
+//          { Dimension dd=cp.getMinimumSize();
+//            if (d.width<dd.width)
+//              d.width=dd.width;
+//            if (d.height<dd.height)
+//              d.height=dd.height;
+//
+//          }
 
         compute(left, xcenter, right, width, minwidth, l.x, d.width, res);
         int new_x=res[0];
