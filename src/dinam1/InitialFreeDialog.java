@@ -149,8 +149,8 @@ public class InitialFreeDialog extends TrackedDialog
                                  massa.getValue(),
                                  getValue(xPos),
                                  getValue(yPos),
-                                 vel.getX(),
-                                 vel.getY());
+                                 vel.getXPos(),
+                                 vel.getYPos());
 
             target.deliverEvent(new Event(target, Event.ACTION_EVENT, simul));
           }

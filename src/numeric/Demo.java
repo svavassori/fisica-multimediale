@@ -20,7 +20,7 @@ public class Demo implements ODE
         ODESolver os=new ODESolver(demo, t, s, 0.5, 1e-5);
 
         
-        while(os.nextStep()==ODESolver.OK && (t=os.getX())<4*Math.PI/omega)
+        while(os.nextStep()==ODESolver.OK && (t=os.getXPos())<4*Math.PI/omega)
           { double x=s[0];
             double y=s[1];
             double xx=r*Math.sin(omega*t);

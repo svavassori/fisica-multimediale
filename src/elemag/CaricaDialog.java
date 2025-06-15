@@ -115,11 +115,11 @@ public class CaricaDialog extends TrackedDialog
       { return carica.getValue();
       }
 
-    public double getX()
+    public double getXPos()
       { return xPos.getValue();
       }
 
-    public double getY()
+    public double getYPos()
       { return yPos.getValue();
       }
   }

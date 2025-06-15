@@ -27,13 +27,13 @@ public class ODEInterpolator
 
     public ODEInterpolator(ODESolver solv)
       { solver=solv;
-        x1=solver.getX();
+        x1=solver.getXPos();
         y1=new double[solver.getDimension()];
         solver.getY(y1);
 
         if (solver.isOk() &&
               solver.nextStep()==ODESolver.OK)
-          { x2=solver.getX();
+          { x2=solver.getXPos();
             y2=new double[solver.getDimension()];
             solver.getY(y2);
           }
@@ -66,7 +66,7 @@ public class ODEInterpolator
             double tmp[]=y1;
             y1=y2;
             y2=tmp;
-            x2=solver.getX();
+            x2=solver.getXPos();
             solver.getY(y2);
           }
 

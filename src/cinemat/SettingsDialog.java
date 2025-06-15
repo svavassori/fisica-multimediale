@@ -263,8 +263,8 @@ public class SettingsDialog extends TrackedDialog
             settings.acc_base=acc_base.getValue();
             settings.vel_ang_base=vel_ang_base.getValue();
             settings.raggio=raggio.getValue();
-            settings.vel_rel_x=vel_rel.getX();
-            settings.vel_rel_y=vel_rel.getY();
+            settings.vel_rel_x=vel_rel.getXPos();
+            settings.vel_rel_y=vel_rel.getYPos();
             settings.vel_rel_ang=vel_rel_ang.getValue();
             settings.x0=x0.getValue();
             if (cbAxes!=null)

@@ -195,8 +195,8 @@ public class SettingsDialog extends TrackedDialog
       { if ("OK".equals(what))
           { dispose();
             Settings settings=new Settings();
-            settings.fx=forza.getX();
-            settings.fy=forza.getY();
+            settings.fx=forza.getXPos();
+            settings.fy=forza.getYPos();
             Checkbox curr=cbg.getCurrent();
             int i;
             for(i=0; i<Settings.TIPI_DI_VINCOLO; i++)

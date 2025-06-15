@@ -230,7 +230,7 @@ public class ODESolver
     /**
      * Gets the current value of x
      */
-    public double getX()
+    public double getXPos()
       { return x;
       }
 
@@ -246,7 +246,7 @@ public class ODESolver
      * Gets the current value of y.
      * Returns a vector that is shared with the ODE Solver.
      */
-    public double[] getY()
+    public double[] getYPos()
       { return y;
       }
 

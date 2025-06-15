@@ -151,8 +151,8 @@ public class InitialGravDialog extends TrackedDialog
                                  massa.getValue(),
                                  getValue(xPos),
                                  getValue(yPos),
-                                 vel.getX()*vel_scale,
-                                 vel.getY()*vel_scale);
+                                 vel.getXPos()*vel_scale,
+                                 vel.getYPos()*vel_scale);
 
             target.deliverEvent(new Event(target, Event.ACTION_EVENT, simul));
           }

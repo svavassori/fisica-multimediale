@@ -260,7 +260,7 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
            }
          else if (e.getID()==MouseEvent.MOUSE_CLICKED)
            { double coords[]=new double[2];
-             pixelToReal(e.getX(),e.getY(), coords);        
+             pixelToReal(e.getX(),e.getY(), coords);
              if (settings.campo==Settings.ELASTICO)
                { Dialog dialog=new InitialElastDialog(
                          controller,

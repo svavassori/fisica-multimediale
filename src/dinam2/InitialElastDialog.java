@@ -146,8 +146,8 @@ public class InitialElastDialog extends TrackedDialog
                                  massa.getValue(),
                                  getValue(xPos),
                                  getValue(yPos),
-                                 vel.getX(),
-                                 vel.getY());
+                                 vel.getXPos(),
+                                 vel.getYPos());
             System.out.println("Valued: "+massa.getValue());
             target.deliverEvent(new Event(target, Event.ACTION_EVENT, simul));
           }

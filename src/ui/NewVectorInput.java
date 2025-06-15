@@ -116,14 +116,14 @@ public class NewVectorInput extends Panel
     /**
      * Return the current X component 
      */
-    public double getX()
+    public double getXPos()
       { return xComp.getValue();
       }
 
     /**
      * Return the current Y component 
      */
-    public double getY()
+    public double getYPos()
       { return yComp.getValue();
       }
 

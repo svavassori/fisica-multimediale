@@ -133,11 +133,11 @@ public class CoppiaDialog extends TrackedDialog
       { return dens.getValue();
       }
 
-    public double getX()
+    public double getXPos()
       { return xPos.getValue();
       }
 
-    public double getY()
+    public double getYPos()
       { return yPos.getValue();
       }
 

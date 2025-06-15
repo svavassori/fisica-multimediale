@@ -654,15 +654,15 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
 
         if (what instanceof CaricaDialog)
           { CaricaDialog cd=(CaricaDialog)what;
-            aggiungiCarica(cd.getCarica(), cd.getX(), cd.getY());
+            aggiungiCarica(cd.getCarica(), cd.getXPos(), cd.getYPos());
           }
         else if (what instanceof PianoDialog)
           { PianoDialog pd=(PianoDialog)what;
-            aggiungiPiano(pd.getDens(), pd.getX(), pd.getY(), pd.getAng());
+            aggiungiPiano(pd.getDens(), pd.getXPos(), pd.getYPos(), pd.getAng());
           }
         else if (what instanceof CoppiaDialog)
           { CoppiaDialog cd=(CoppiaDialog)what;
-            aggiungiCoppia(cd.getDens(), cd.getX(), cd.getY(),
+            aggiungiCoppia(cd.getDens(), cd.getXPos(), cd.getYPos(),
                            cd.getDist(), cd.getExt(), cd.getHoriz());
           }
         else if (what instanceof CampoDialog)

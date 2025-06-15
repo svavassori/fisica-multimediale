@@ -134,18 +134,18 @@ public class RelTransDialog extends TrackedDialog
       }
 
     public double getVelX()
-      { return vel.getX();
+      { return vel.getXPos();
       }
 
     public double getVelY()
-      { return vel.getY();
+      { return vel.getYPos();
       }
 
     public double getAccX()
-      { return acc.getX();
+      { return acc.getXPos();
       }
 
     public double getAccY()
-      { return acc.getY();
+      { return acc.getYPos();
       }
   }

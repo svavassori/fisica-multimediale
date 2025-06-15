@@ -243,8 +243,8 @@ public class SettingsDialog extends TrackedDialog
             settings.costante_elastica=elast.getValue();
             settings.resistenza_laminare=res_lam.getValue();
             settings.resistenza_turbolenta=res_turb.getValue();
-            settings.fx=forza.getX();
-            settings.fy=forza.getY();
+            settings.fx=forza.getXPos();
+            settings.fy=forza.getYPos();
             settings.massa=massa.getValue()*1e24;
 
             target.deliverEvent(new Event(target, Event.ACTION_EVENT, settings));

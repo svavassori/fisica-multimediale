@@ -141,8 +141,8 @@ public class MotoDialog extends TrackedDialog
                                               carica.getValue(),
                                               xPos.getValue(),
                                               yPos.getValue(),
-                                              vel.getX(),
-                                              vel.getY(),
+                                              vel.getXPos(),
+                                              vel.getYPos(),
                                               timeScale.getValue());
 
             target.deliverEvent(new Event(target, Event.ACTION_EVENT, 
