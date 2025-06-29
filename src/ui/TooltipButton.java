@@ -1,6 +1,8 @@
 package ui;
 
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import ui.Tooltip;
 
 public class TooltipButton extends Canvas implements Runnable
@@ -12,6 +14,7 @@ public class TooltipButton extends Canvas implements Runnable
     int tipDelay=1000;
     boolean tipEnabled=false;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public TooltipButton()
       { tip=null;
@@ -33,20 +36,21 @@ public class TooltipButton extends Canvas implements Runnable
       }
 
     public synchronized boolean mouseEnter(Event evt, int x, int y)
-      { if (thread!=null)
-          thread.stop();
+      {
+        stopThread();
         moved=false;
         if (tipEnabled && tip!=null && tip.length()>0)
-          { thread=new Thread(this);
+          {
+            isRunning.set(true);
+            thread=new Thread(this);
             thread.start();
           }
         return false; // Pass this event to the parent
       }
 
     public synchronized boolean mouseExit(Event evt, int x, int y)
-      { if (thread!=null)
-          thread.stop();
-        thread=null;
+      {
+        stopThread();
         if ((x!=last_x || y!=last_y) && tooltip!=null)
           { tooltip.dispose();
             tooltip=null;
@@ -66,10 +70,8 @@ public class TooltipButton extends Canvas implements Runnable
       }
 
     public synchronized boolean mouseDown(Event evt, int x, int y)
-      { if (thread!=null)
-          thread.stop();
-          
-        thread=null;
+      {
+        stopThread();
        
         if (tooltip!=null)
           tooltip.dispose();
@@ -77,7 +79,15 @@ public class TooltipButton extends Canvas implements Runnable
 
         return true;
       }
-    
+
+  private void stopThread() {
+    if (thread != null) {
+//          thread.stop();
+      isRunning.set(false);
+      thread.interrupt(); // this is to wakeup sleep()
+      thread = null;
+    }
+  }
     public void run()
       { boolean endloop;
         do {
@@ -93,7 +103,7 @@ public class TooltipButton extends Canvas implements Runnable
           synchronized (this)
             { endloop=!moved;
             }
-        } while (!endloop);
+        } while (!endloop && isRunning.get());
 
         synchronized (this)
           { if (tooltip!=null)

@@ -6,6 +6,7 @@ import numeric.*;
 import util.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -38,6 +39,7 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
      CoordinateMapper map;
      AxesDrawer axesDrawer;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
      public SimulationDisplay(Component controller, StatusDisplayer status,
                               Options options, Settings settings)
@@ -73,15 +75,19 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
 
      public synchronized void startAnimation()
        { stopAnimation();
+         isRunning.set(true);
          thread=new Thread(this);
          thread.start();
          
        }
 
      public synchronized void stopAnimation()
-       { if (thread!=null)
-           { thread.stop();
-           }
+       {
+         if (thread!=null) {
+//          thread.stop();
+           isRunning.set(false);
+           thread.interrupt(); // this is to wakeup sleep()
+         }
          thread=null;
        }
 
@@ -114,7 +120,7 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
          expectedTime=System.currentTimeMillis();
 
          int last_s=0;
-         for(s=0; s<n; s+=stepsPerFrame)
+         for(s=0; s<n  && isRunning.get(); s+=stepsPerFrame)
            { expectedTime+=(int)(1000*frameDelay);
 
              time=System.currentTimeMillis();

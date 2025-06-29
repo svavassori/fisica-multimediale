@@ -4,7 +4,7 @@ import ui.*;
 import util.*;
 
 import java.awt.*;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -41,7 +41,7 @@ public class SimulationCompton extends Panel
     double ang, ang1;
     double Ei, Ee, Ec;
 
-
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public SimulationCompton()
       { photon=UserInterface.getImageLoader().load("icons/sml-ball.gif");
@@ -177,13 +177,18 @@ public class SimulationCompton extends Panel
         lambdaI=lami*ANGSTROM;
         this.ang=ang*Math.PI/180;
         compute();
+        isRunning.set(true);
         thread=new Thread(this);
         thread.start();
       }
 
     public synchronized void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -265,7 +270,7 @@ public class SimulationCompton extends Panel
         Graphics mg=motionDisplay.getGraphics();
         Graphics mbg=motionDisplay.getBackgroundGraphics();
 
-        while(time<=maxTime)
+        while(time<=maxTime && isRunning.get())
           { 
             paintMotion(mbg);
             repositionSprites();

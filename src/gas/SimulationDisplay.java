@@ -4,6 +4,7 @@ import ui.*;
 import numeric.*;
 import util.*;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -27,6 +28,7 @@ public class SimulationDisplay extends SpriteCanvas
      PaintableCanvas legenda;
      double time;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
      public SimulationDisplay(Settings settings, PaintableCanvas legenda,
                               StatusDisplayer status)
@@ -49,16 +51,20 @@ public class SimulationDisplay extends SpriteCanvas
 
 
      public synchronized void startAnimation()
-       { stopAnimation();
+       {
+         stopAnimation();
+         isRunning.set(true);
          thread=new Thread(this);
          thread.start();
-         
        }
 
      public synchronized void stopAnimation()
-       { if (thread!=null)
-           { thread.stop();
-           }
+       {
+         if (thread!=null) {
+//          thread.stop();
+           isRunning.set(false);
+           thread.interrupt(); // this is to wakeup sleep()
+         }
          thread=null;
        }
 
@@ -80,7 +86,7 @@ public class SimulationDisplay extends SpriteCanvas
          Graphics g=getBackgroundGraphics();
          Rectangle clip=new Rectangle(0,0,dim.width, dim.height);
          
-         while (time<=maxTime)
+         while (time<=maxTime && isRunning.get())
            { 
              millis+=(long)(frameDelay*1000);
              if (millis>=System.currentTimeMillis())

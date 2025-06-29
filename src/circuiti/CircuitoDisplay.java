@@ -4,6 +4,7 @@ import ui.*;
 import util.*;
 import numeric.*;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -421,7 +422,7 @@ public class CircuitoDisplay extends SpriteCanvas implements Runnable
 
     public synchronized void stopSimulation()
       { if (thread!=null)
-          { thread.stop();
+          { //thread.stop(); The code is pure computation, no way to interrupt it properly.
             thread=null;
             curs.setCursor();
           }

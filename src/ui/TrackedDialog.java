@@ -15,7 +15,7 @@ public class TrackedDialog extends Dialog {
     public TrackedDialog(Window  parent, String  title, boolean  modal) {
         //super(parent,title,modal);
         super(WindowsTracker.firstwin,title,false);
-        if (modal) parent.enable(false);
+//        if (modal) parent.enable(false);
         p=parent;
         WindowsTracker.add(this);
     }

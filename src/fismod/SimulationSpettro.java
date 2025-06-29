@@ -4,7 +4,7 @@ import ui.*;
 import util.*;
 
 import java.awt.*;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -34,7 +34,7 @@ public class SimulationSpettro extends Panel
     int level=1;
     Thread thread=null;
 
-
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public SimulationSpettro()
       { ball=UserInterface.getImageLoader().load("icons/sml-ball.gif");
@@ -188,13 +188,18 @@ public class SimulationSpettro extends Panel
               righe[i]=false;
           }
         stopAnimation();
+        isRunning.set(true);
         thread=new Thread(this);
         thread.start();
       }
 
     public synchronized void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -247,7 +252,7 @@ public class SimulationSpettro extends Panel
 
         Graphics g=graphDisplay.getGraphics();
 
-        while(time<=maxTime)
+        while(time<=maxTime && isRunning.get())
           { repositionBall();
 
             time+=frameDelay;

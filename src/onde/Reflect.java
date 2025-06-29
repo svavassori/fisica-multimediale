@@ -5,6 +5,7 @@ import util.*;
 import numeric.*;
 
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -34,6 +35,7 @@ public class Reflect extends Canvas
      */
     double side;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public Reflect(Settings settings, Component legenda, 
                    StatusDisplayer status)
@@ -110,7 +112,9 @@ public class Reflect extends Canvas
       { stopAnimation();
         repaint();
         if (reflectSettings!=null)
-          { thread=new Thread(this);
+          {
+            isRunning.set(true);
+            thread=new Thread(this);
             thread.start();
           }
         else
@@ -121,8 +125,12 @@ public class Reflect extends Canvas
       }
 
     public void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -138,7 +146,7 @@ public class Reflect extends Canvas
             return;
           }
         boolean out=false;
-        while (!out)
+        while (!out && isRunning.get())
           { if (status!=null)
               { status.showStatus("t="
                                   +Format.remove(step*periodo, periodo)

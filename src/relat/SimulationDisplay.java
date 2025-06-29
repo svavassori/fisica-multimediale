@@ -5,6 +5,7 @@ import ui.*;
 import numeric.*;
 import util.*;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -36,6 +37,7 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
      AxesDrawer axesDrawer;
      Insets insets;
 
+     private final AtomicBoolean isRunning = new AtomicBoolean();
 
      public SimulationDisplay(StatusDisplayer status,
                               Options options, Settings settings,
@@ -74,16 +76,20 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
        }
 
      public synchronized void startAnimation()
-       { stopAnimation();
+       {
+         stopAnimation();
+         isRunning.set(true);
          thread=new Thread(this);
          thread.start();
-         
        }
 
      public synchronized void stopAnimation()
-       { if (thread!=null)
-           { thread.stop();
-           }
+       {
+         if (thread!=null) {
+//          thread.stop();
+           isRunning.set(false);
+           thread.interrupt(); // this is to wakeup sleep()
+         }
          thread=null;
          curs.setCursor(Frame.DEFAULT_CURSOR);
        }
@@ -119,7 +125,7 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
          expectedTime=System.currentTimeMillis();
 
          int last_s=0;
-         for(s=0; s<n; s+=stepsPerFrame)
+         for(s=0; s<n && isRunning.get(); s+=stepsPerFrame)
            { if (s%stepsBetweenUpdates == 0)
                { simulationInfoDisplay.update(s);
                  addMarker(simulation.getX(s), simulation.getY(s));
