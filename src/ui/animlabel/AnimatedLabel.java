@@ -2,6 +2,7 @@ package ui.animlabel;
 
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -16,6 +17,7 @@ public class AnimatedLabel extends Canvas implements Runnable
     Dimension dim=new Dimension(-1, -1);
     int hpad=5, vpad=3;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public AnimatedLabel()
       { this("", 100);
@@ -52,6 +54,7 @@ public class AnimatedLabel extends Canvas implements Runnable
 
     public void start()
       { stop();
+        isRunning.set(true);
         thread=new Thread(this);
         thread.setDaemon(true);
         thread.setPriority(Thread.MIN_PRIORITY);
@@ -59,8 +62,12 @@ public class AnimatedLabel extends Canvas implements Runnable
       }
 
     public void stop()
-      { if (thread!=null) 
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -68,7 +75,7 @@ public class AnimatedLabel extends Canvas implements Runnable
       { int frame;
         int idx;
 
-        for(frame=0; true; frame++)
+        for(frame=0; isRunning.get(); frame++)
           { try
               { Thread.sleep(delay);
               }

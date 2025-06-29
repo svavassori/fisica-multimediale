@@ -5,6 +5,7 @@ import util.*;
 import numeric.*;
 
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -34,6 +35,7 @@ public class Interf extends Canvas
      */
     double side;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public Interf(Settings settings, Component legenda, 
                    StatusDisplayer status)
@@ -98,13 +100,18 @@ public class Interf extends Canvas
     public void startAnimation()
       { stopAnimation();
         repaint();
+        isRunning.set(true);
         thread=new Thread(this);
         thread.start();
       }
 
     public void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -121,7 +128,7 @@ public class Interf extends Canvas
             return;
           }
         boolean out=false;
-        while (!out)
+        while (!out && isRunning.get())
           { if (status!=null)
               { status.showStatus("t="
                                   +Format.remove(step*periodo, periodo)

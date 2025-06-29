@@ -4,7 +4,7 @@ import ui.*;
 import util.*;
 
 import java.awt.*;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -32,6 +32,7 @@ public class SimulationBohr extends Panel
 
     Thread thread=null;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public SimulationBohr()
       { ball=UserInterface.getImageLoader().load("icons/sml-ball.gif");
@@ -197,14 +198,20 @@ public class SimulationBohr extends Panel
     }     
 
     public synchronized void startAnimation()
-      { stopAnimation();
+      {
+        stopAnimation();
+        isRunning.set(true);
         thread=new Thread(this);
         thread.start();
       }
 
     public synchronized void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -257,7 +264,7 @@ public class SimulationBohr extends Panel
 
         Graphics g=graphDisplay.getGraphics();
 
-        while(time<=maxTime)
+        while(time<=maxTime && isRunning.get())
           { repositionBall();
 
             time+=frameDelay;

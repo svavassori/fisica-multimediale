@@ -4,6 +4,7 @@ import ui.*;
 import util.*;
 import numeric.*;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The canvas which displays the simulation
@@ -68,6 +69,8 @@ public class SimulationDisplay extends SpriteCanvas implements Runnable
 
     Image ball;
     int ball_width, ball_height;
+
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
 
     public SimulationDisplay(Component controller, StatusDisplayer status)
@@ -1197,6 +1200,7 @@ external_loop:
         step=0;
         if (animation==null)
           return;
+        isRunning.set(true);
         thread=new Thread(this);
         thread.start();
       }
@@ -1205,8 +1209,12 @@ external_loop:
      * Ferma l'animazione
      */
     public synchronized void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
         curs.setCursor();
       }
@@ -1231,7 +1239,7 @@ external_loop:
 
         animation.runUpTo(animation.getStopTime()+ts*duration, ts*frameDelay);
         Point pt0=map.realToPixel(animation.getX(0), animation.getY(0));
-        for(i=0; i<animation.getStepCount(); i++)
+        for(i=0; i<animation.getStepCount() && isRunning.get(); i++)
           { step=i;
             Point pt=map.realToPixel(animation.getX(step), 
                                      animation.getY(step));

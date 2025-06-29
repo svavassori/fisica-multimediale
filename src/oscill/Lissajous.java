@@ -5,6 +5,7 @@ import util.*;
 import numeric.*;
 
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -24,6 +25,8 @@ public class Lissajous extends Canvas
     AxesDrawer axes;
     CursorChanger curs;
     Thread thread=null;
+
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public Lissajous(Settings settings, Component legenda,
                      StatusDisplayer status) 
@@ -108,6 +111,7 @@ public class Lissajous extends Canvas
     public synchronized void startAnimation()
       { stopAnimation();
         repaint();
+        isRunning.set(true);
         thread=new Thread(this);
         // thread.setPriority(Thread.NORM_PRIORITY-2);
         thread.setPriority(Thread.MIN_PRIORITY);
@@ -115,8 +119,12 @@ public class Lissajous extends Canvas
       }
 
     public synchronized void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -137,7 +145,7 @@ public class Lissajous extends Canvas
         if (g==null)
           return;
 
-        while(true)
+        while(isRunning.get())
           { double x=calcOnda(0, t);
             double y=calcOnda(1, t);
             Point pt=realToPixel(x, y);

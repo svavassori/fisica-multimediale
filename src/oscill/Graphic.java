@@ -5,6 +5,7 @@ import util.*;
 import numeric.*;
 
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -29,6 +30,7 @@ public class Graphic extends Canvas
 
     double time0=0;
 
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
     public Graphic(Settings settings, 
                    GraphicSettings graphicSettings,
@@ -121,14 +123,19 @@ public class Graphic extends Canvas
     public synchronized void startAnimation()
       { stopAnimation();
         repaint();
+        isRunning.set(true);
         thread=new Thread(this);
         thread.setPriority(Thread.MIN_PRIORITY);
         thread.start();
       }
 
     public synchronized void stopAnimation()
-      { if (thread!=null)
-          thread.stop();
+      {
+        if (thread!=null) {
+//          thread.stop();
+          isRunning.set(false);
+          thread.interrupt(); // this is to wakeup sleep()
+        }
         thread=null;
       }
 
@@ -169,7 +176,7 @@ public class Graphic extends Canvas
         double z[]={0, 0};
         Point zero=realToPixel(0, 0);
 
-        while(true)
+        while(isRunning.get())
           {
 
 
