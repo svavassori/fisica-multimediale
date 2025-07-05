@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.*;
+import java.net.URL;
 import java.util.*;
 
 
@@ -23,7 +24,8 @@ public class ApplicationImageLoader extends ImageLoader
         String name1=gsub(name, "/", fileSep);
         String fullName=basePath+fileSep+name1;
 
-        return Toolkit.getDefaultToolkit().getImage(fullName);
+        URL url = this.getClass().getResource("/" + name);
+        return Toolkit.getDefaultToolkit().getImage(url);
       }
 
     /**
