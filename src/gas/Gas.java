@@ -42,7 +42,6 @@ public class Gas implements Exit
 
 import java.awt.*;
 
-import java.applet.*;
 
 import ui.*;
 

@@ -3,7 +3,6 @@ package circuiti;
 
 import java.awt.*;
 
-import java.applet.*;
 
 import ui.*;
 

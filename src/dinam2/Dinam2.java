@@ -3,7 +3,6 @@ package dinam2;
 
 import java.awt.*;
 
-import java.applet.*;
 
 import ui.*;
 

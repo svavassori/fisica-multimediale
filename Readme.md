@@ -11,10 +11,10 @@ A pristine copy of it can be found at the initial import commit.
 
 ## Build and Execution
 
-From the root of the project, to compile sources into .class files:
+From the `src` directory of the project, to compile sources into .class files:
 
 ```shell
-find -name "*.java" > /tmp/sources.txt
+find -name "*.java" | grep -v "Applet\|Demo2.java" > /tmp/sources.txt
 javac --add-exports java.desktop/java.awt.peer=ALL-UNNAMED -d /tmp/out @/tmp/sources.txt
 ```
 
@@ -26,7 +26,7 @@ jar -cvf simul.jar -C /tmp/out/ .
 rm -fr /tmp/sources.txt /tmp/out/
 ```
 
-From the root of the project, to execute a module:
+From the `src` directory of the project, to execute a module:
 
 ```shell
 java -cp . cinemat.Cinemat
@@ -112,11 +112,17 @@ and onwards.
 ### 4. Removing java.lang.Thread.stop() usage
 
 Since Java 20 `java.lang.Thread.stop()` implementation throws
-`UnsupportedOperationException` and it is maked for removal, so if the user tries
+`UnsupportedOperationException` and it is marked for removal, so if the user tries
 to exit the application before the animation ends, that exception is thrown.
-To avoid that the code has been changed to not call `Thread.stop()` method, but
+To avoid that, the code has been changed to not call `Thread.stop()` method and
 changing a `java.util.concurrent.atomic.AtomicBoolean` value to properly end the
 animation.
+
+### 5. Removed import of java.applet.* where not needed
+
+Since Java 26 Applet API has been removed, so Applets classes cannot be compiled anymore.
+All `java.applet.*;` import have been deleted from the classes that were importing but
+not using it.
 
 It has been tested (compilation and execution) with the following JDK on Linux amd64:
 
@@ -137,5 +143,6 @@ JDK 21  OpenJDK-21      21.0.7      requires patch of java.lang.Thread.stop()
                                     if someone wants to exit before the animation
                                     completes, otherwise it throws
                                     UnsupportedOperationException (since Java 20)
-JDK 25  OpenJDK-25-ea   25-ea+22
+JDK 25  OpenJDK-25      25.0.2
+JDK 26  OpenJDK-26      26.0.0      removed Applet API (https://openjdk.org/jeps/504)
 ```

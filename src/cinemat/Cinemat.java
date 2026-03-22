@@ -1,7 +1,6 @@
 package cinemat;
 
 import java.awt.*;
-import java.applet.*;
 import ui.*;
 import util.Preloader;
 /*

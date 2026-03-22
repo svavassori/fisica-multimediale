@@ -41,7 +41,6 @@ public class Relat implements Exit
 
 import java.awt.*;
 
-import java.applet.*;
 
 import ui.*;
 
